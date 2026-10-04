@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Add project root to sys.path so 'src' is resolvable
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import argparse
 import gc
 import json

@@ -28,6 +28,6 @@ select = ["E", "F", "I", "UP"]
 ignore = ["E501"]
 
 [tool.ty.src]
-include = ["src/**/*.py", "*.py"]
+include = ["src/**/*.py", "scripts/**/*.py", "*.py"]
 exclude = ["references/**", "temp/**"]
 

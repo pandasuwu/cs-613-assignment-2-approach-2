@@ -67,24 +67,24 @@ If you previously logged in with `huggingface-cli login`, the pipeline non-destr
 
 All model checkpoints, tokenizers, and datasets are strictly isolated within the project-local `cache/huggingface` directory. User home directories are never polluted.
 
-### Pre-Downloading Assets (Mandatory Pre-Requisite)
+## Execution Pipeline
 
-Before launching benchmark encoding or transformations, download and verify all 4 model checkpoints and 7 benchmark datasets into the isolated project cache:
+The execution operates in four decoupled, idempotent, and resumable stages.
+
+### Stage 0: Download and Cache Assets
+
+Downloads all 4 model checkpoints and 7 benchmark datasets into the isolated project cache (`cache/huggingface/`):
 
 ```bash
 # Download and verify all 4 models and 7 datasets
-uv run download.py
+uv run scripts/download.py
 
 # Or download specific subsets
-uv run download.py --models-only
-uv run download.py --tasks-only
-uv run download.py --model google/embeddinggemma-300m
-uv run download.py --task FiQA2018
+uv run scripts/download.py --models-only
+uv run scripts/download.py --tasks-only
+uv run scripts/download.py --model google/embeddinggemma-300m
+uv run scripts/download.py --task FiQA2018
 ```
-
-## Execution Pipeline
-
-The execution operates in three decoupled, resumable stages.
 
 ### Stage 1: Encode and Cache Raw Representations
 
@@ -92,11 +92,11 @@ Extracts representations once per model, task, and pooling mode into `cache/embe
 
 ```bash
 # Run all models and core tasks
-uv run encode.py
+uv run scripts/encode.py
 
 # Run a single combination
-uv run encode.py --model google/embeddinggemma-300m --task FiQA2018
-uv run encode.py --model Qwen/Qwen3.5-0.8B-Base --task FiQA2018 --pooling mean_pooling
+uv run scripts/encode.py --model google/embeddinggemma-300m --task FiQA2018
+uv run scripts/encode.py --model Qwen/Qwen3.5-0.8B-Base --task FiQA2018 --pooling mean_pooling
 ```
 
 ### Stage 2: Post-Processing Transformations
@@ -105,10 +105,10 @@ Applies all full and compression transformations to raw cached tensors:
 
 ```bash
 # Transform all cached combinations
-uv run transform.py
+uv run scripts/transform.py
 
 # Transform a single combination
-uv run transform.py --model google/embeddinggemma-300m --task FiQA2018
+uv run scripts/transform.py --model google/embeddinggemma-300m --task FiQA2018
 ```
 
 ### Stage 3: Evaluation and Metric Generation
@@ -117,13 +117,13 @@ Evaluates transformed representations and writes atomic CSV leaves into `results
 
 ```bash
 # Evaluate information retrieval
-uv run eval_retrieval.py
+uv run scripts/eval_retrieval.py
 
 # Evaluate semantic textual similarity
-uv run eval_similarity.py
+uv run scripts/eval_similarity.py
 
 # Evaluate intrinsic space geometry diagnostics
-uv run eval_geometry.py
+uv run scripts/eval_geometry.py
 ```
 
 Pass `--overwrite` to any script to recompute existing cached artifacts or results.

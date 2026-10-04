@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Add project root to sys.path so 'src' is resolvable
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 # Enforce project-local cache isolation before importing huggingface_hub
 from src.config import HF_HOME, logger  # isort: skip
 
