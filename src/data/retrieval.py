@@ -17,69 +17,48 @@ class RetrievalDataset:
     instruction: str
 
 
-def load_retrieval_dataset(
-    task_name: str, split_name: str = "test"
-) -> RetrievalDataset:
-    """Load and parse an MTEB v2 retrieval benchmark dataset into clean Python types."""
-    logger.info("Loading retrieval task: %s (split=%s)", task_name, split_name)
+def load_retrieval_dataset(task_name: str) -> RetrievalDataset:
+    """Load an MTEB v2 retrieval benchmark (FiQA2018, ArguAna, SCIDOCS, TRECCOVID).
+
+    All 4 retrieval tasks share an identical structure in MTEB v2:
+        - Split container: task.dataset["default"]["test"]
+        - Sub-keys: 'corpus', 'queries', 'relevant_docs'
+        - Corpus columns: 'id' (str), 'title' (str), 'text' (str)
+        - Queries columns: 'id' (str), 'text' (str)
+        - Relevant docs (qrels): dict[str, dict[str, int]]
+        - Task instruction: task.metadata.prompt["query"]
+    """
+    logger.info("Loading retrieval task: %s", task_name)
     task: Any = mteb.get_task(task_name)
     task.load_data()
 
-    dataset_dict = task.dataset
-    if split_name in dataset_dict:
-        split = dataset_dict[split_name]
-    elif "default" in dataset_dict and split_name in dataset_dict["default"]:
-        split = dataset_dict["default"][split_name]
-    elif "en" in dataset_dict and split_name in dataset_dict["en"]:
-        split = dataset_dict["en"][split_name]
-    else:
-        available_splits = list(dataset_dict.keys())
-        raise ValueError(
-            f"Split '{split_name}' not found for task '{task_name}'. Available: {available_splits}"
-        )
-
+    split = task.dataset["default"]["test"]
     corpus = split["corpus"]
     queries = split["queries"]
-    raw_qrels = split["relevant_docs"]
+    qrels = split["relevant_docs"]
 
-    # Format document text joining title and body text: "title text"
-    titles = corpus["title"] if "title" in corpus.column_names else [""] * len(corpus)
+    # Prepend non-empty title to body text with a space according to standard BEIR protocol
     doc_texts = [
-        f"{t} {x}".strip() if t else x for t, x in zip(titles, corpus["text"])
+        f"{t} {x}".strip() if t else x
+        for t, x in zip(corpus["title"], corpus["text"])
     ]
-    doc_ids = [str(did) for did in corpus["id"]]
 
-    query_texts = [str(q) for q in queries["text"]]
-    query_ids = [str(qid) for qid in queries["id"]]
-
-    # Standardize qrels to dict[str, dict[str, int]]
-    qrels: dict[str, dict[str, int]] = {}
-    for qid, doc_dict in raw_qrels.items():
-        qrels[str(qid)] = {str(did): int(rel) for did, rel in dict(doc_dict).items()}
-
-    # Extract task query prompt instruction if present in metadata
-    prompt = ""
-    if hasattr(task, "metadata") and task.metadata is not None:
-        raw_prompt = getattr(task.metadata, "prompt", "")
-        if isinstance(raw_prompt, dict):
-            prompt = raw_prompt.get("query", "")
-        elif isinstance(raw_prompt, str):
-            prompt = raw_prompt
+    instruction = task.metadata.prompt.get("query", "") if task.metadata and task.metadata.prompt else ""
 
     logger.info(
         "Loaded %s: %d documents, %d queries, %d qrel entries",
         task_name,
         len(doc_texts),
-        len(query_texts),
+        len(queries["text"]),
         len(qrels),
     )
 
     return RetrievalDataset(
         task_name=task_name,
         doc_texts=doc_texts,
-        doc_ids=doc_ids,
-        query_texts=query_texts,
-        query_ids=query_ids,
+        doc_ids=list(corpus["id"]),
+        query_texts=list(queries["text"]),
+        query_ids=list(queries["id"]),
         qrels=qrels,
-        instruction=prompt,
+        instruction=instruction,
     )

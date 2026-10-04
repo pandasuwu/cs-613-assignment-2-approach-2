@@ -6,17 +6,20 @@ from typing import Any
 import torch
 
 from src.config import get_device, logger
-from src.metrics.similarity import compute_pearson_r, compute_spearman_rho
+from src.metrics import compute_similarity_metrics
 from src.registry import (
     BASE_MODELS,
     BASE_POOLING_MODES,
     COMPRESSION_LADDER_K,
+    COMPRESSION_METHODS,
     EMBEDDING_MODELS,
+    FULL_METHODS,
     SIMILARITY_TASKS,
     get_raw_cache_dir,
     get_result_dir,
     get_transformed_cache_dir,
     is_base_model,
+    write_result_csv,
 )
 
 
@@ -31,22 +34,9 @@ def evaluate_similarity_for_method(
     # Row-wise cosine similarity between paired sentences
     sims = torch.sum(s1 * s2, dim=1).cpu()
 
-    spearman_rho = compute_spearman_rho(sims, gold_scores)
-    pearson_r = compute_pearson_r(sims, gold_scores)
-
-    out_csv.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_csv, "w", encoding="utf-8") as f:
-        if extra_cols:
-            header_keys = list(extra_cols.keys()) + ["spearman_rho", "pearson_r"]
-            header_vals = [str(extra_cols[k]) for k in extra_cols] + [f"{spearman_rho:.4f}", f"{pearson_r:.4f}"]
-            f.write(",".join(header_keys) + "\n")
-            f.write(",".join(header_vals) + "\n")
-        else:
-            f.write("metric,value\n")
-            f.write(f"spearman_rho,{spearman_rho:.4f}\n")
-            f.write(f"pearson_r,{pearson_r:.4f}\n")
-
-    return {"spearman_rho": spearman_rho, "pearson_r": pearson_r}
+    metrics = compute_similarity_metrics(sims, gold_scores)
+    write_result_csv(out_csv, metrics, extra_cols=extra_cols, precision=4)
+    return metrics
 
 
 def evaluate_similarity_combination(
@@ -67,11 +57,7 @@ def evaluate_similarity_combination(
     gold_scores = meta["scores"]
 
     # 1. Full-Dimension Transforms
-    full_methods = [
-        "baseline", "standardization", "r1", "r2", "soft_zca",
-        "abtt_1", "abtt_2", "abtt_3", "rand", "mc"
-    ]
-    for method in full_methods:
+    for method in FULL_METHODS:
         csv_path = get_result_dir("similarity", task_name, model_id, "full", pooling=pooling) / f"{method}.csv"
         if csv_path.exists() and not overwrite:
             continue
@@ -92,8 +78,7 @@ def evaluate_similarity_combination(
         )
 
     # 2. Compression Transforms
-    compression_methods = ["prefix", "random_truncation", "pca", "whitening", "spectemp"]
-    for method in compression_methods:
+    for method in COMPRESSION_METHODS:
         for k in COMPRESSION_LADDER_K:
             sub_name = f"{method}_k{k}"
             csv_path = get_result_dir("similarity", task_name, model_id, "compression", pooling=pooling) / f"{sub_name}.csv"

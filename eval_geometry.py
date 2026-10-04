@@ -5,24 +5,21 @@ from typing import Any
 import torch
 
 from src.config import get_device, logger
-from src.metrics.geometry import (
-    compute_average_cosine,
-    compute_centroid_norm,
-    compute_isoscore,
-    compute_mev,
-    compute_nid,
-)
+from src.metrics import compute_geometry_metrics
 from src.registry import (
     BASE_MODELS,
     BASE_POOLING_MODES,
     COMPRESSION_LADDER_K,
+    COMPRESSION_METHODS,
     EMBEDDING_MODELS,
+    FULL_METHODS,
     RETRIEVAL_TASKS,
     SIMILARITY_TASKS,
     get_raw_cache_dir,
     get_result_dir,
     get_transformed_cache_dir,
     is_base_model,
+    write_result_csv,
 )
 
 
@@ -32,38 +29,9 @@ def evaluate_geometry_for_tensor(
     extra_cols: dict[str, Any] | None = None,
 ) -> dict[str, float]:
     """Compute the 5 intrinsic geometry metrics and write atomic CSV."""
-    centroid_norm = compute_centroid_norm(tensor)
-    average_cosine = compute_average_cosine(tensor)
-    mev = compute_mev(tensor)
-    nid = compute_nid(tensor)
-    isoscore = compute_isoscore(tensor)
-
-    out_csv.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_csv, "w", encoding="utf-8") as f:
-        if extra_cols:
-            header_keys = list(extra_cols.keys()) + [
-                "centroid_norm", "average_cosine", "mev_top1", "nid_spectral_entropy", "isoscore"
-            ]
-            header_vals = [str(extra_cols[k]) for k in extra_cols] + [
-                f"{centroid_norm:.6f}", f"{average_cosine:.6f}", f"{mev:.6f}", f"{nid:.6f}", f"{isoscore:.6f}"
-            ]
-            f.write(",".join(header_keys) + "\n")
-            f.write(",".join(header_vals) + "\n")
-        else:
-            f.write("metric,value\n")
-            f.write(f"centroid_norm,{centroid_norm:.6f}\n")
-            f.write(f"average_cosine,{average_cosine:.6f}\n")
-            f.write(f"mev_top1,{mev:.6f}\n")
-            f.write(f"nid_spectral_entropy,{nid:.6f}\n")
-            f.write(f"isoscore,{isoscore:.6f}\n")
-
-    return {
-        "centroid_norm": centroid_norm,
-        "average_cosine": average_cosine,
-        "mev_top1": mev,
-        "nid_spectral_entropy": nid,
-        "isoscore": isoscore,
-    }
+    metrics = compute_geometry_metrics(tensor)
+    write_result_csv(out_csv, metrics, extra_cols=extra_cols, precision=6)
+    return metrics
 
 
 def evaluate_geometry_combination(
@@ -77,11 +45,7 @@ def evaluate_geometry_combination(
     is_retrieval = (raw_dir / "corpus.pt").exists()
 
     # 1. Full-Dimension Transforms (including baseline)
-    full_methods = [
-        "baseline", "standardization", "r1", "r2", "soft_zca",
-        "abtt_1", "abtt_2", "abtt_3", "rand", "mc"
-    ]
-    for method in full_methods:
+    for method in FULL_METHODS:
         csv_path = get_result_dir("geometry", task_name, model_id, "full", pooling=pooling) / f"{method}.csv"
         if csv_path.exists() and not overwrite:
             continue
@@ -109,8 +73,7 @@ def evaluate_geometry_combination(
         )
 
     # 2. Compression Transforms
-    compression_methods = ["prefix", "random_truncation", "pca", "whitening", "spectemp"]
-    for method in compression_methods:
+    for method in COMPRESSION_METHODS:
         for k in COMPRESSION_LADDER_K:
             sub_name = f"{method}_k{k}"
             csv_path = get_result_dir("geometry", task_name, model_id, "compression", pooling=pooling) / f"{sub_name}.csv"

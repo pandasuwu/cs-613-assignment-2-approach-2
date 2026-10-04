@@ -16,6 +16,4 @@ def load_embedding_model(model_id: str) -> SentenceTransformer:
     )
     model.to(torch.float32)
     model.max_seq_length = MAX_SEQ_LENGTH
-    if hasattr(model, "tokenizer") and model.tokenizer is not None:
-        model.tokenizer.model_max_length = MAX_SEQ_LENGTH
     return model

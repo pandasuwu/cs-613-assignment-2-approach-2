@@ -2,7 +2,6 @@ import argparse
 import json
 from typing import Any
 
-import mteb
 import torch
 
 from src.config import DEFAULT_BATCH_SIZE_DOCS, DEFAULT_BATCH_SIZE_QUERIES, logger
@@ -26,12 +25,6 @@ from src.registry import (
 )
 
 
-def is_retrieval_task(task_name: str) -> bool:
-    """Identify whether a task is retrieval using official MTEB metadata."""
-    task = mteb.get_task(task_name)
-    return getattr(task.metadata, "type", "") == "Retrieval"
-
-
 def encode_single_combination(
     model_id: str,
     task_name: str,
@@ -45,74 +38,49 @@ def encode_single_combination(
     """Encode texts for a single model and task combination, saving FP32 tensors to raw cache."""
     cache_dir = get_raw_cache_dir(task_name, model_id, pooling=pooling)
     cache_dir.mkdir(parents=True, exist_ok=True)
-
     meta_file = cache_dir / "meta.json"
-    retrieval = is_retrieval_task(task_name)
+    retrieval = task_name in RETRIEVAL_TASKS
 
-    if retrieval:
-        corpus_file = cache_dir / "corpus.pt"
-        queries_file = cache_dir / "queries.pt"
-        if corpus_file.exists() and queries_file.exists() and meta_file.exists() and not overwrite:
-            logger.info("Skipping %s on %s (already cached in %s)", model_id, task_name, cache_dir)
-            return
-    else:
-        s1_file = cache_dir / "sentences1.pt"
-        s2_file = cache_dir / "sentences2.pt"
-        if s1_file.exists() and s2_file.exists() and meta_file.exists() and not overwrite:
-            logger.info("Skipping %s on %s (already cached in %s)", model_id, task_name, cache_dir)
-            return
+    # Check for existing cached artifacts to ensure idempotent execution
+    t1_file = cache_dir / ("corpus.pt" if retrieval else "sentences1.pt")
+    t2_file = cache_dir / ("queries.pt" if retrieval else "sentences2.pt")
+    if t1_file.exists() and t2_file.exists() and meta_file.exists() and not overwrite:
+        logger.info("Skipping %s on %s (already cached in %s)", model_id, task_name, cache_dir)
+        return
 
     logger.info("Encoding %s on %s (pooling=%s)", model_id, task_name, pooling)
 
-    # 1. Load Data
     if retrieval:
         ds_ret = load_retrieval_dataset(task_name)
+        if is_base_model(model_id):
+            base_model, base_tokenizer = (loaded_model, loaded_tokenizer) if loaded_model else load_base_model(model_id)
+            pool_mode = "last_token" if pooling == "last_token_pooling" else "mean"
+            t1 = encode_base_texts(ds_ret.doc_texts, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_docs)
+            t2 = encode_base_texts(ds_ret.query_texts, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
+        else:
+            emb_model = loaded_model if loaded_model else load_embedding_model(model_id)
+            t1 = encode_embedding_corpus(ds_ret.doc_texts, emb_model, model_id, batch_size=batch_size_docs)
+            t2 = encode_embedding_queries(ds_ret.query_texts, emb_model, model_id, instruction=ds_ret.instruction, batch_size=batch_size_queries)
+
+        meta = {"qids": ds_ret.query_ids, "dids": ds_ret.doc_ids, "qrels": ds_ret.qrels}
     else:
         ds_sim = load_similarity_dataset(task_name)
-
-    # 2. Encode
-    if is_base_model(model_id):
-        if loaded_model is None or loaded_tokenizer is None:
-            base_model, base_tokenizer = load_base_model(model_id)
+        if is_base_model(model_id):
+            base_model, base_tokenizer = (loaded_model, loaded_tokenizer) if loaded_model else load_base_model(model_id)
+            pool_mode = "last_token" if pooling == "last_token_pooling" else "mean"
+            t1 = encode_base_texts(ds_sim.sentences1, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
+            t2 = encode_base_texts(ds_sim.sentences2, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
         else:
-            base_model, base_tokenizer = loaded_model, loaded_tokenizer
+            emb_model = loaded_model if loaded_model else load_embedding_model(model_id)
+            t1 = encode_embedding_sentences(ds_sim.sentences1, emb_model, batch_size=batch_size_queries)
+            t2 = encode_embedding_sentences(ds_sim.sentences2, emb_model, batch_size=batch_size_queries)
 
-        pool_mode = "mean" if (pooling == "mean_pooling" or pooling is None) else "last_token"
+        meta = {"scores": ds_sim.scores}
 
-        if retrieval:
-            corpus_tensor = encode_base_texts(ds_ret.doc_texts, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_docs)
-            queries_tensor = encode_base_texts(ds_ret.query_texts, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
-            torch.save(corpus_tensor, cache_dir / "corpus.pt")
-            torch.save(queries_tensor, cache_dir / "queries.pt")
-            with open(meta_file, "w", encoding="utf-8") as f:
-                json.dump({"qids": ds_ret.query_ids, "dids": ds_ret.doc_ids, "qrels": ds_ret.qrels}, f)
-        else:
-            s1_tensor = encode_base_texts(ds_sim.sentences1, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
-            s2_tensor = encode_base_texts(ds_sim.sentences2, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
-            torch.save(s1_tensor, cache_dir / "sentences1.pt")
-            torch.save(s2_tensor, cache_dir / "sentences2.pt")
-            with open(meta_file, "w", encoding="utf-8") as f:
-                json.dump({"scores": ds_sim.scores}, f)
-    else:
-        if loaded_model is None:
-            emb_model = load_embedding_model(model_id)
-        else:
-            emb_model = loaded_model
-
-        if retrieval:
-            corpus_tensor = encode_embedding_corpus(ds_ret.doc_texts, emb_model, model_id, batch_size=batch_size_docs)
-            queries_tensor = encode_embedding_queries(ds_ret.query_texts, emb_model, model_id, instruction=ds_ret.instruction, batch_size=batch_size_queries)
-            torch.save(corpus_tensor, cache_dir / "corpus.pt")
-            torch.save(queries_tensor, cache_dir / "queries.pt")
-            with open(meta_file, "w", encoding="utf-8") as f:
-                json.dump({"qids": ds_ret.query_ids, "dids": ds_ret.doc_ids, "qrels": ds_ret.qrels}, f)
-        else:
-            s1_tensor = encode_embedding_sentences(ds_sim.sentences1, emb_model, batch_size=batch_size_queries)
-            s2_tensor = encode_embedding_sentences(ds_sim.sentences2, emb_model, batch_size=batch_size_queries)
-            torch.save(s1_tensor, cache_dir / "sentences1.pt")
-            torch.save(s2_tensor, cache_dir / "sentences2.pt")
-            with open(meta_file, "w", encoding="utf-8") as f:
-                json.dump({"scores": ds_sim.scores}, f)
+    torch.save(t1, t1_file)
+    torch.save(t2, t2_file)
+    with open(meta_file, "w", encoding="utf-8") as f:
+        json.dump(meta, f)
 
     logger.info("Saved raw cached representations to %s", cache_dir)
 

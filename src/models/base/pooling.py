@@ -18,11 +18,18 @@ def last_token_pooling(
     attention_mask: torch.Tensor,
     padding_side: str = "right",
 ) -> torch.Tensor:
-    """Extract hidden state of the final non-padding token."""
+    """Extract hidden state of the final non-padding token.
+
+    When padding on the left, the final non-padding token is always at index -1.
+    When padding on the right, the final non-padding token is at active length - 1.
+    In benchmarks such as FiQA2018 (38 empty documents) and TRECCOVID (1 empty document),
+    empty texts produce attention_mask.sum() == 0. Clamping to min=0 prevents PyTorch
+    from wrapping negative indices to trailing padding tokens in right-padded batches.
+    """
     if padding_side == "left":
         return hidden_states[:, -1, :]
 
-    sequence_lengths = attention_mask.sum(dim=1) - 1
+    sequence_lengths = torch.clamp(attention_mask.sum(dim=1) - 1, min=0)
     batch_size = hidden_states.shape[0]
     return hidden_states[
         torch.arange(batch_size, device=hidden_states.device), sequence_lengths

@@ -27,9 +27,11 @@ def transform_rand(
     Returns:
         Tuple of (transformed_x1, transformed_x2), each L2 unit-normalized.
     """
-    generator = torch.Generator(device=x1.device).manual_seed(seed)
+    # Initialize pseudo-random generator on CPU to guarantee bit-level identical random vectors
+    # across heterogeneous hardware backends (Apple Silicon MPS, Linux CUDA, CPU).
+    generator = torch.Generator(device="cpu").manual_seed(seed)
     d = x1.shape[1]
-    v = torch.randn(d, generator=generator, device=x1.device, dtype=x1.dtype)
+    v = torch.randn(d, generator=generator, device="cpu", dtype=x1.dtype).to(x1.device)
     u = v / torch.linalg.norm(v)
 
     x1_proj = (x1 @ u).unsqueeze(1) * u

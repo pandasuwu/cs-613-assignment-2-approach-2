@@ -6,21 +6,20 @@ from typing import Any
 import torch
 
 from src.config import DEFAULT_BATCH_SIZE_SEARCH, get_device, logger
-from src.metrics.retrieval import (
-    compute_mrr_at_k,
-    compute_ndcg_at_k,
-    compute_recall_at_k,
-)
+from src.metrics import compute_retrieval_metrics
 from src.registry import (
     BASE_MODELS,
     BASE_POOLING_MODES,
     COMPRESSION_LADDER_K,
+    COMPRESSION_METHODS,
     EMBEDDING_MODELS,
+    FULL_METHODS,
     RETRIEVAL_TASKS,
     get_raw_cache_dir,
     get_result_dir,
     get_transformed_cache_dir,
     is_base_model,
+    write_result_csv,
 )
 
 
@@ -56,24 +55,9 @@ def evaluate_retrieval_for_method(
                 for idx, score in zip(topk_indices_cpu[b_idx], topk_scores_cpu[b_idx])
             }
 
-    ndcg_10 = compute_ndcg_at_k(qrels, run, k=10)
-    recall_100 = compute_recall_at_k(qrels, run, k=100)
-    mrr_10 = compute_mrr_at_k(qrels, run, k=10)
-
-    out_csv.parent.mkdir(parents=True, exist_ok=True)
-    with open(out_csv, "w", encoding="utf-8") as f:
-        if extra_cols:
-            header_keys = list(extra_cols.keys()) + ["ndcg_at_10", "recall_at_100", "mrr_at_10"]
-            header_vals = [str(extra_cols[k]) for k in extra_cols] + [f"{ndcg_10:.6f}", f"{recall_100:.6f}", f"{mrr_10:.6f}"]
-            f.write(",".join(header_keys) + "\n")
-            f.write(",".join(header_vals) + "\n")
-        else:
-            f.write("metric,value\n")
-            f.write(f"ndcg_at_10,{ndcg_10:.6f}\n")
-            f.write(f"recall_at_100,{recall_100:.6f}\n")
-            f.write(f"mrr_at_10,{mrr_10:.6f}\n")
-
-    return {"ndcg_at_10": ndcg_10, "recall_at_100": recall_100, "mrr_at_10": mrr_10}
+    metrics = compute_retrieval_metrics(qrels, run)
+    write_result_csv(out_csv, metrics, extra_cols=extra_cols, precision=6)
+    return metrics
 
 
 def evaluate_retrieval_combination(
@@ -81,7 +65,7 @@ def evaluate_retrieval_combination(
     task_name: str,
     pooling: str | None = None,
     overwrite: bool = False,
-    batch_size_search: int = 128,
+    batch_size_search: int = DEFAULT_BATCH_SIZE_SEARCH,
 ) -> None:
     """Evaluate retrieval metrics across all full and compression transforms for a combination."""
     raw_dir = get_raw_cache_dir(task_name, model_id, pooling=pooling)
@@ -95,11 +79,7 @@ def evaluate_retrieval_combination(
     qids, dids, qrels = meta["qids"], meta["dids"], meta["qrels"]
 
     # 1. Full-Dimension Transforms
-    full_methods = [
-        "baseline", "standardization", "r1", "r2", "soft_zca",
-        "abtt_1", "abtt_2", "abtt_3", "rand", "mc"
-    ]
-    for method in full_methods:
+    for method in FULL_METHODS:
         csv_path = get_result_dir("retrieval", task_name, model_id, "full", pooling=pooling) / f"{method}.csv"
         if csv_path.exists() and not overwrite:
             continue
@@ -122,8 +102,7 @@ def evaluate_retrieval_combination(
         )
 
     # 2. Compression Transforms
-    compression_methods = ["prefix", "random_truncation", "pca", "whitening", "spectemp"]
-    for method in compression_methods:
+    for method in COMPRESSION_METHODS:
         for k in COMPRESSION_LADDER_K:
             sub_name = f"{method}_k{k}"
             csv_path = get_result_dir("retrieval", task_name, model_id, "compression", pooling=pooling) / f"{sub_name}.csv"

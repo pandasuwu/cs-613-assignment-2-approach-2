@@ -1,5 +1,6 @@
 import argparse
 import json
+from typing import Any
 
 import torch
 
@@ -71,17 +72,17 @@ def run_transforms_for_combination(
     # ==========================================
     # 1. Full-Dimension Transforms (d -> d)
     # ==========================================
-    full_transforms = {
-        "baseline": lambda a, b: transform_baseline(a, b),
-        "standardization": lambda a, b: transform_standardization(a, b, calib_data),
-        "r1": lambda a, b: transform_r1(a, b, calib_data),
-        "r2": lambda a, b: transform_r2(a, b, calib_data),
-        "soft_zca": lambda a, b: transform_soft_zca(a, b, calib_data, epsilon=1e-4),
-        "abtt_1": lambda a, b: transform_abtt(a, b, calib_data, d_components=1),
-        "abtt_2": lambda a, b: transform_abtt(a, b, calib_data, d_components=2),
-        "abtt_3": lambda a, b: transform_abtt(a, b, calib_data, d_components=3),
-        "rand": lambda a, b: transform_rand(a, b),
-        "mc": lambda a, b: transform_mc(a, b, calib_data),
+    full_transforms: dict[str, Any] = {
+        "baseline": lambda: transform_baseline(x1, x2),
+        "standardization": lambda: transform_standardization(x1, x2, calib_data),
+        "r1": lambda: transform_r1(x1, x2, calib_data),
+        "r2": lambda: transform_r2(x1, x2, calib_data),
+        "soft_zca": lambda: transform_soft_zca(x1, x2, calib_data, epsilon=1e-4),
+        "abtt_1": lambda: transform_abtt(x1, x2, calib_data, d_components=1),
+        "abtt_2": lambda: transform_abtt(x1, x2, calib_data, d_components=2),
+        "abtt_3": lambda: transform_abtt(x1, x2, calib_data, d_components=3),
+        "rand": lambda: transform_rand(x1, x2),
+        "mc": lambda: transform_mc(x1, x2, calib_data),
     }
 
     for method_name, func in full_transforms.items():
@@ -93,7 +94,7 @@ def run_transforms_for_combination(
         if f1.exists() and f2.exists() and not overwrite:
             continue
 
-        x1_trans, x2_trans = func(x1, x2)
+        x1_trans, x2_trans = func()
         torch.save(x1_trans.cpu(), f1)
         torch.save(x2_trans.cpu(), f2)
 
@@ -104,57 +105,34 @@ def run_transforms_for_combination(
         if k >= native_d:
             continue
 
-        # Prefix coordinate slicing (Matryoshka representation baseline)
-        out_prefix = get_transformed_cache_dir(task_name, model_id, "compression", f"prefix_k{k}", pooling=pooling)
-        out_prefix.mkdir(parents=True, exist_ok=True)
-        f1 = out_prefix / out_name1
-        f2 = out_prefix / out_name2
-        if overwrite or not (f1.exists() and f2.exists()):
-            xp1, xp2 = transform_prefix(x1, x2, target_dim=k)
-            torch.save(xp1.cpu(), f1)
-            torch.save(xp2.cpu(), f2)
+        comp_transforms: dict[str, Any] = {
+            f"prefix_k{k}": lambda: (*transform_prefix(x1, x2, target_dim=k), None),
+            f"random_truncation_k{k}": lambda: (*transform_random_truncation(x1, x2, target_dim=k), None),
+            f"pca_k{k}": lambda: (*transform_pca(x1, x2, calib_data, target_dim=k), None),
+            f"whitening_k{k}": lambda: (*transform_whitening(x1, x2, calib_data, target_dim=k), None),
+            f"spectemp_k{k}": lambda: transform_spectemp(x1, x2, calib_data, target_dim=k),
+        }
 
-        # Uniform random coordinate sampling (Negative scientific control)
-        out_rand = get_transformed_cache_dir(task_name, model_id, "compression", f"random_truncation_k{k}", pooling=pooling)
-        out_rand.mkdir(parents=True, exist_ok=True)
-        f1 = out_rand / out_name1
-        f2 = out_rand / out_name2
-        if overwrite or not (f1.exists() and f2.exists()):
-            xr1, xr2 = transform_random_truncation(x1, x2, target_dim=k)
-            torch.save(xr1.cpu(), f1)
-            torch.save(xr2.cpu(), f2)
+        for sub_name, func in comp_transforms.items():
+            out_dir = get_transformed_cache_dir(task_name, model_id, "compression", sub_name, pooling=pooling)
+            out_dir.mkdir(parents=True, exist_ok=True)
+            f1 = out_dir / out_name1
+            f2 = out_dir / out_name2
+            gamma_file = out_dir / "gamma.json"
 
-        # Principal Component Analysis
-        out_pca = get_transformed_cache_dir(task_name, model_id, "compression", f"pca_k{k}", pooling=pooling)
-        out_pca.mkdir(parents=True, exist_ok=True)
-        f1 = out_pca / out_name1
-        f2 = out_pca / out_name2
-        if overwrite or not (f1.exists() and f2.exists()):
-            x_pca1, x_pca2 = transform_pca(x1, x2, calib_data, target_dim=k)
-            torch.save(x_pca1.cpu(), f1)
-            torch.save(x_pca2.cpu(), f2)
+            needs_run = overwrite or not (f1.exists() and f2.exists())
+            if "spectemp" in sub_name:
+                needs_run = needs_run or not gamma_file.exists()
 
-        # Truncated Whitening-k
-        out_white = get_transformed_cache_dir(task_name, model_id, "compression", f"whitening_k{k}", pooling=pooling)
-        out_white.mkdir(parents=True, exist_ok=True)
-        f1 = out_white / out_name1
-        f2 = out_white / out_name2
-        if overwrite or not (f1.exists() and f2.exists()):
-            xw1, xw2 = transform_whitening(x1, x2, calib_data, target_dim=k)
-            torch.save(xw1.cpu(), f1)
-            torch.save(xw2.cpu(), f2)
+            if not needs_run:
+                continue
 
-        # SpecTemp (Adaptive SNR-tempered spectral projection)
-        out_spec = get_transformed_cache_dir(task_name, model_id, "compression", f"spectemp_k{k}", pooling=pooling)
-        out_spec.mkdir(parents=True, exist_ok=True)
-        f1 = out_spec / out_name1
-        f2 = out_spec / out_name2
-        if overwrite or not (f1.exists() and f2.exists()):
-            xs1, xs2, gamma = transform_spectemp(x1, x2, calib_data, target_dim=k)
-            torch.save(xs1.cpu(), f1)
-            torch.save(xs2.cpu(), f2)
-            with open(out_spec / "gamma.json", "w", encoding="utf-8") as f:
-                json.dump({"gamma": gamma}, f)
+            tx1, tx2, gamma = func()
+            torch.save(tx1.cpu(), f1)
+            torch.save(tx2.cpu(), f2)
+            if gamma is not None:
+                with open(gamma_file, "w", encoding="utf-8") as f:
+                    json.dump({"gamma": gamma}, f)
 
     logger.info("Completed all transforms for %s on %s", model_id, task_name)
 

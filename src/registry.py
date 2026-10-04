@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 from src.config import EMBEDDINGS_CACHE_DIR, RESULTS_DIR
 
@@ -39,6 +40,28 @@ SIMILARITY_TASKS: list[str] = [
 
 # 3. Compression Ladder Target Dimensions (d -> k)
 COMPRESSION_LADDER_K: list[int] = [512, 256, 128, 64]
+
+# 4. Post-Processing Method Identifiers
+FULL_METHODS: list[str] = [
+    "baseline",
+    "standardization",
+    "r1",
+    "r2",
+    "soft_zca",
+    "abtt_1",
+    "abtt_2",
+    "abtt_3",
+    "rand",
+    "mc",
+]
+
+COMPRESSION_METHODS: list[str] = [
+    "prefix",
+    "random_truncation",
+    "pca",
+    "whitening",
+    "spectemp",
+]
 
 
 def sanitize_model_id(model_id: str) -> str:
@@ -116,3 +139,35 @@ def get_result_dir(
         pool_name = pooling if pooling else "mean_pooling"
         return RESULTS_DIR / track / dataset / "base" / clean_id / pool_name / regime
     return RESULTS_DIR / track / dataset / "embedding" / clean_id / regime
+
+
+def write_result_csv(
+    out_csv: Path,
+    metrics: dict[str, float],
+    extra_cols: dict[str, Any] | None = None,
+    precision: int = 6,
+) -> None:
+    """Write metric results to an atomic CSV leaf conforming to the specification schema.
+
+    Schema:
+        Full-dimension:
+            metric,value
+            ndcg_at_10,0.365400
+            ...
+        Compression:
+            k,gamma,ndcg_at_10,recall_at_100,mrr_at_10
+            512,0.1500,0.362000,0.635000,0.339000
+    """
+    out_csv.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_csv, "w", encoding="utf-8") as f:
+        if extra_cols:
+            keys = list(extra_cols.keys()) + list(metrics.keys())
+            vals = [str(extra_cols[k]) for k in extra_cols] + [
+                f"{v:.{precision}f}" for v in metrics.values()
+            ]
+            f.write(",".join(keys) + "\n")
+            f.write(",".join(vals) + "\n")
+        else:
+            f.write("metric,value\n")
+            for k, v in metrics.items():
+                f.write(f"{k},{v:.{precision}f}\n")
