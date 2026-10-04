@@ -67,15 +67,17 @@ If you previously logged in with `huggingface-cli login`, the pipeline non-destr
 
 All model checkpoints, tokenizers, and datasets are strictly isolated within the project-local `cache/huggingface` directory. User home directories are never polluted.
 
-### Pre-Downloading Assets (Optional)
+### Pre-Downloading Assets (Mandatory Pre-Requisite)
 
-To download and verify all models and datasets into local cache prior to running experiments:
+Before launching benchmark encoding or transformations, download and verify all 4 model checkpoints and 7 benchmark datasets into the isolated project cache:
 
 ```bash
-# Pre-download all 4 models and 7 datasets
+# Download and verify all 4 models and 7 datasets
 uv run download.py
 
-# Pre-download a specific model or dataset
+# Or download specific subsets
+uv run download.py --models-only
+uv run download.py --tasks-only
 uv run download.py --model google/embeddinggemma-300m
 uv run download.py --task FiQA2018
 ```
