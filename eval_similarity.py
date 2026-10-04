@@ -58,11 +58,16 @@ def evaluate_similarity_combination(
 
     # 1. Full-Dimension Transforms
     for method in FULL_METHODS:
-        csv_path = get_result_dir("similarity", task_name, model_id, "full", pooling=pooling) / f"{method}.csv"
+        csv_path = (
+            get_result_dir("similarity", task_name, model_id, "full", pooling=pooling)
+            / f"{method}.csv"
+        )
         if csv_path.exists() and not overwrite:
             continue
 
-        trans_dir = get_transformed_cache_dir(task_name, model_id, "full", method, pooling=pooling)
+        trans_dir = get_transformed_cache_dir(
+            task_name, model_id, "full", method, pooling=pooling
+        )
         s1_file = trans_dir / "sentences1.pt"
         s2_file = trans_dir / "sentences2.pt"
         if not (s1_file.exists() and s2_file.exists()):
@@ -74,18 +79,29 @@ def evaluate_similarity_combination(
         res = evaluate_similarity_for_method(s1, s2, gold_scores, csv_path)
         logger.info(
             "[%s | %s | full | %s] Spearman=%.2f  Pearson=%.2f",
-            task_name, model_id, method, res["spearman_rho"], res["pearson_r"]
+            task_name,
+            model_id,
+            method,
+            res["spearman_rho"],
+            res["pearson_r"],
         )
 
     # 2. Compression Transforms
     for method in COMPRESSION_METHODS:
         for k in COMPRESSION_LADDER_K:
             sub_name = f"{method}_k{k}"
-            csv_path = get_result_dir("similarity", task_name, model_id, "compression", pooling=pooling) / f"{sub_name}.csv"
+            csv_path = (
+                get_result_dir(
+                    "similarity", task_name, model_id, "compression", pooling=pooling
+                )
+                / f"{sub_name}.csv"
+            )
             if csv_path.exists() and not overwrite:
                 continue
 
-            trans_dir = get_transformed_cache_dir(task_name, model_id, "compression", sub_name, pooling=pooling)
+            trans_dir = get_transformed_cache_dir(
+                task_name, model_id, "compression", sub_name, pooling=pooling
+            )
             s1_file = trans_dir / "sentences1.pt"
             s2_file = trans_dir / "sentences2.pt"
             if not (s1_file.exists() and s2_file.exists()):
@@ -99,20 +115,41 @@ def evaluate_similarity_combination(
                 with open(trans_dir / "gamma.json", encoding="utf-8") as gf:
                     gamma_val = json.load(gf).get("gamma")
 
-            extra = {"k": k, "gamma": f"{gamma_val:.4f}" if gamma_val is not None else ""}
-            res = evaluate_similarity_for_method(s1, s2, gold_scores, csv_path, extra_cols=extra)
+            extra = {
+                "k": k,
+                "gamma": f"{gamma_val:.4f}" if gamma_val is not None else "",
+            }
+            res = evaluate_similarity_for_method(
+                s1, s2, gold_scores, csv_path, extra_cols=extra
+            )
             logger.info(
                 "[%s | %s | compression | %s] Spearman=%.2f  Pearson=%.2f",
-                task_name, model_id, sub_name, res["spearman_rho"], res["pearson_r"]
+                task_name,
+                model_id,
+                sub_name,
+                res["spearman_rho"],
+                res["pearson_r"],
             )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Stage 3: Semantic Textual Similarity (STS) evaluation (Spearman rho, Pearson r).")
-    parser.add_argument("--model", type=str, default=None, help="Model ID. Default: all models.")
-    parser.add_argument("--task", type=str, default=None, help="Task name. Default: all STS tasks.")
-    parser.add_argument("--pooling", type=str, default=None, help="Pooling mode for base LLMs.")
-    parser.add_argument("--overwrite", action="store_true", help="Re-evaluate and overwrite existing CSVs.")
+    parser = argparse.ArgumentParser(
+        description="Stage 3: Semantic Textual Similarity (STS) evaluation (Spearman rho, Pearson r)."
+    )
+    parser.add_argument(
+        "--model", type=str, default=None, help="Model ID. Default: all models."
+    )
+    parser.add_argument(
+        "--task", type=str, default=None, help="Task name. Default: all STS tasks."
+    )
+    parser.add_argument(
+        "--pooling", type=str, default=None, help="Pooling mode for base LLMs."
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Re-evaluate and overwrite existing CSVs.",
+    )
 
     args = parser.parse_args()
 
@@ -120,7 +157,11 @@ def main() -> None:
     tasks_to_run = [args.task] if args.task else SIMILARITY_TASKS
 
     for model_id in models_to_run:
-        poolings = [args.pooling] if args.pooling else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
+        poolings = (
+            [args.pooling]
+            if args.pooling
+            else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
+        )
         for task_name in tasks_to_run:
             for pool_mode in poolings:
                 evaluate_similarity_combination(

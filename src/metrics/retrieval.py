@@ -37,8 +37,17 @@ def compute_retrieval_metrics(
 
     # Standard TREC evaluation: average over all benchmark queries in qrels
     n_queries = len(qrels)
-    ndcg = sum(float(res_100[q]["ndcg_cut_10"]) if q in res_100 else 0.0 for q in qrels) / n_queries
-    recall = sum(float(res_100[q]["recall_100"]) if q in res_100 else 0.0 for q in qrels) / n_queries
-    mrr = sum(float(res_10[q]["recip_rank"]) if q in res_10 else 0.0 for q in qrels) / n_queries
+    ndcg = (
+        sum(float(res_100[q]["ndcg_cut_10"]) if q in res_100 else 0.0 for q in qrels)
+        / n_queries
+    )
+    recall = (
+        sum(float(res_100[q]["recall_100"]) if q in res_100 else 0.0 for q in qrels)
+        / n_queries
+    )
+    mrr = (
+        sum(float(res_10[q]["recip_rank"]) if q in res_10 else 0.0 for q in qrels)
+        / n_queries
+    )
 
     return {"ndcg_at_10": ndcg, "recall_at_100": recall, "mrr_at_10": mrr}

@@ -52,7 +52,9 @@ def run_transforms_for_combination(
         calib_data = x1
     else:
         if not (raw_dir / "sentences1.pt").exists():
-            logger.warning("Raw embeddings not found in %s. Run encode.py first.", raw_dir)
+            logger.warning(
+                "Raw embeddings not found in %s. Run encode.py first.", raw_dir
+            )
             return
         x1 = torch.load(raw_dir / "sentences1.pt", weights_only=True)
         x2 = torch.load(raw_dir / "sentences2.pt", weights_only=True)
@@ -67,7 +69,14 @@ def run_transforms_for_combination(
     calib_data = calib_data.to(device)
 
     native_d = x1.shape[1]
-    logger.info("Transforming %s on %s (native_d=%d, pooling=%s, device=%s)", model_id, task_name, native_d, pooling, device)
+    logger.info(
+        "Transforming %s on %s (native_d=%d, pooling=%s, device=%s)",
+        model_id,
+        task_name,
+        native_d,
+        pooling,
+        device,
+    )
 
     # ==========================================
     # 1. Full-Dimension Transforms (d -> d)
@@ -86,7 +95,9 @@ def run_transforms_for_combination(
     }
 
     for method_name, func in full_transforms.items():
-        out_dir = get_transformed_cache_dir(task_name, model_id, "full", method_name, pooling=pooling)
+        out_dir = get_transformed_cache_dir(
+            task_name, model_id, "full", method_name, pooling=pooling
+        )
         out_dir.mkdir(parents=True, exist_ok=True)
         f1 = out_dir / out_name1
         f2 = out_dir / out_name2
@@ -107,14 +118,27 @@ def run_transforms_for_combination(
 
         comp_transforms: dict[str, Any] = {
             f"prefix_k{k}": lambda: (*transform_prefix(x1, x2, target_dim=k), None),
-            f"random_truncation_k{k}": lambda: (*transform_random_truncation(x1, x2, target_dim=k), None),
-            f"pca_k{k}": lambda: (*transform_pca(x1, x2, calib_data, target_dim=k), None),
-            f"whitening_k{k}": lambda: (*transform_whitening(x1, x2, calib_data, target_dim=k), None),
-            f"spectemp_k{k}": lambda: transform_spectemp(x1, x2, calib_data, target_dim=k),
+            f"random_truncation_k{k}": lambda: (
+                *transform_random_truncation(x1, x2, target_dim=k),
+                None,
+            ),
+            f"pca_k{k}": lambda: (
+                *transform_pca(x1, x2, calib_data, target_dim=k),
+                None,
+            ),
+            f"whitening_k{k}": lambda: (
+                *transform_whitening(x1, x2, calib_data, target_dim=k),
+                None,
+            ),
+            f"spectemp_k{k}": lambda: transform_spectemp(
+                x1, x2, calib_data, target_dim=k
+            ),
         }
 
         for sub_name, func in comp_transforms.items():
-            out_dir = get_transformed_cache_dir(task_name, model_id, "compression", sub_name, pooling=pooling)
+            out_dir = get_transformed_cache_dir(
+                task_name, model_id, "compression", sub_name, pooling=pooling
+            )
             out_dir.mkdir(parents=True, exist_ok=True)
             f1 = out_dir / out_name1
             f2 = out_dir / out_name2
@@ -138,11 +162,23 @@ def run_transforms_for_combination(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Stage 2: Post-processing transformations and caching.")
-    parser.add_argument("--model", type=str, default=None, help="Model ID. Default: all models.")
-    parser.add_argument("--task", type=str, default=None, help="Task name. Default: all tasks.")
-    parser.add_argument("--pooling", type=str, default=None, help="Pooling mode for base LLMs.")
-    parser.add_argument("--overwrite", action="store_true", help="Re-transform and overwrite existing cache.")
+    parser = argparse.ArgumentParser(
+        description="Stage 2: Post-processing transformations and caching."
+    )
+    parser.add_argument(
+        "--model", type=str, default=None, help="Model ID. Default: all models."
+    )
+    parser.add_argument(
+        "--task", type=str, default=None, help="Task name. Default: all tasks."
+    )
+    parser.add_argument(
+        "--pooling", type=str, default=None, help="Pooling mode for base LLMs."
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Re-transform and overwrite existing cache.",
+    )
 
     args = parser.parse_args()
 
@@ -150,7 +186,11 @@ def main() -> None:
     tasks_to_run = [args.task] if args.task else (RETRIEVAL_TASKS + SIMILARITY_TASKS)
 
     for model_id in models_to_run:
-        poolings = [args.pooling] if args.pooling else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
+        poolings = (
+            [args.pooling]
+            if args.pooling
+            else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
+        )
         for task_name in tasks_to_run:
             for pool_mode in poolings:
                 run_transforms_for_combination(

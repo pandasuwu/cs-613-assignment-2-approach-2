@@ -46,7 +46,9 @@ def encode_single_combination(
     t1_file = cache_dir / ("corpus.pt" if retrieval else "sentences1.pt")
     t2_file = cache_dir / ("queries.pt" if retrieval else "sentences2.pt")
     if t1_file.exists() and t2_file.exists() and meta_file.exists() and not overwrite:
-        logger.info("Skipping %s on %s (already cached in %s)", model_id, task_name, cache_dir)
+        logger.info(
+            "Skipping %s on %s (already cached in %s)", model_id, task_name, cache_dir
+        )
         return
 
     logger.info("Encoding %s on %s (pooling=%s)", model_id, task_name, pooling)
@@ -54,27 +56,71 @@ def encode_single_combination(
     if retrieval:
         ds_ret = load_retrieval_dataset(task_name)
         if is_base_model(model_id):
-            base_model, base_tokenizer = (loaded_model, loaded_tokenizer) if loaded_model else load_base_model(model_id)
+            base_model, base_tokenizer = (
+                (loaded_model, loaded_tokenizer)
+                if loaded_model
+                else load_base_model(model_id)
+            )
             pool_mode = "last_token" if pooling == "last_token_pooling" else "mean"
-            t1 = encode_base_texts(ds_ret.doc_texts, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_docs)
-            t2 = encode_base_texts(ds_ret.query_texts, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
+            t1 = encode_base_texts(
+                ds_ret.doc_texts,
+                base_model,
+                base_tokenizer,
+                pooling=pool_mode,
+                batch_size=batch_size_docs,
+            )
+            t2 = encode_base_texts(
+                ds_ret.query_texts,
+                base_model,
+                base_tokenizer,
+                pooling=pool_mode,
+                batch_size=batch_size_queries,
+            )
         else:
             emb_model = loaded_model if loaded_model else load_embedding_model(model_id)
-            t1 = encode_embedding_corpus(ds_ret.doc_texts, emb_model, model_id, batch_size=batch_size_docs)
-            t2 = encode_embedding_queries(ds_ret.query_texts, emb_model, model_id, instruction=ds_ret.instruction, batch_size=batch_size_queries)
+            t1 = encode_embedding_corpus(
+                ds_ret.doc_texts, emb_model, model_id, batch_size=batch_size_docs
+            )
+            t2 = encode_embedding_queries(
+                ds_ret.query_texts,
+                emb_model,
+                model_id,
+                instruction=ds_ret.instruction,
+                batch_size=batch_size_queries,
+            )
 
         meta = {"qids": ds_ret.query_ids, "dids": ds_ret.doc_ids, "qrels": ds_ret.qrels}
     else:
         ds_sim = load_similarity_dataset(task_name)
         if is_base_model(model_id):
-            base_model, base_tokenizer = (loaded_model, loaded_tokenizer) if loaded_model else load_base_model(model_id)
+            base_model, base_tokenizer = (
+                (loaded_model, loaded_tokenizer)
+                if loaded_model
+                else load_base_model(model_id)
+            )
             pool_mode = "last_token" if pooling == "last_token_pooling" else "mean"
-            t1 = encode_base_texts(ds_sim.sentences1, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
-            t2 = encode_base_texts(ds_sim.sentences2, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
+            t1 = encode_base_texts(
+                ds_sim.sentences1,
+                base_model,
+                base_tokenizer,
+                pooling=pool_mode,
+                batch_size=batch_size_queries,
+            )
+            t2 = encode_base_texts(
+                ds_sim.sentences2,
+                base_model,
+                base_tokenizer,
+                pooling=pool_mode,
+                batch_size=batch_size_queries,
+            )
         else:
             emb_model = loaded_model if loaded_model else load_embedding_model(model_id)
-            t1 = encode_embedding_sentences(ds_sim.sentences1, emb_model, batch_size=batch_size_queries)
-            t2 = encode_embedding_sentences(ds_sim.sentences2, emb_model, batch_size=batch_size_queries)
+            t1 = encode_embedding_sentences(
+                ds_sim.sentences1, emb_model, batch_size=batch_size_queries
+            )
+            t2 = encode_embedding_sentences(
+                ds_sim.sentences2, emb_model, batch_size=batch_size_queries
+            )
 
         meta = {"scores": ds_sim.scores}
 
@@ -87,13 +133,44 @@ def encode_single_combination(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Stage 1: Encode and cache raw representations.")
-    parser.add_argument("--model", type=str, default=None, help="Model ID (e.g. google/embeddinggemma-300m). Default: all models.")
-    parser.add_argument("--task", type=str, default=None, help="Task name (e.g. FiQA2018, STSBenchmark). Default: all core tasks.")
-    parser.add_argument("--pooling", type=str, default=None, help="Pooling mode for base LLMs (mean_pooling or last_token_pooling).")
-    parser.add_argument("--overwrite", action="store_true", help="Re-encode and overwrite existing cache.")
-    parser.add_argument("--batch-size-docs", type=int, default=DEFAULT_BATCH_SIZE_DOCS, help="Batch size for encoding documents.")
-    parser.add_argument("--batch-size-queries", type=int, default=DEFAULT_BATCH_SIZE_QUERIES, help="Batch size for encoding queries/sentences.")
+    parser = argparse.ArgumentParser(
+        description="Stage 1: Encode and cache raw representations."
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=None,
+        help="Model ID (e.g. google/embeddinggemma-300m). Default: all models.",
+    )
+    parser.add_argument(
+        "--task",
+        type=str,
+        default=None,
+        help="Task name (e.g. FiQA2018, STSBenchmark). Default: all core tasks.",
+    )
+    parser.add_argument(
+        "--pooling",
+        type=str,
+        default=None,
+        help="Pooling mode for base LLMs (mean_pooling or last_token_pooling).",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Re-encode and overwrite existing cache.",
+    )
+    parser.add_argument(
+        "--batch-size-docs",
+        type=int,
+        default=DEFAULT_BATCH_SIZE_DOCS,
+        help="Batch size for encoding documents.",
+    )
+    parser.add_argument(
+        "--batch-size-queries",
+        type=int,
+        default=DEFAULT_BATCH_SIZE_QUERIES,
+        help="Batch size for encoding queries/sentences.",
+    )
 
     args = parser.parse_args()
 

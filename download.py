@@ -1,9 +1,11 @@
+# Enforce project-local cache isolation before importing huggingface_hub
+from src.config import HF_HOME, logger  # isort: skip
+
 import argparse
 import os
 
 from huggingface_hub import snapshot_download
 
-from src.config import HF_HOME, logger
 from src.data import load_retrieval_dataset, load_similarity_dataset
 from src.registry import (
     BASE_MODELS,
@@ -15,10 +17,12 @@ from src.registry import (
 
 def download_model(model_id: str) -> None:
     """Download full model checkpoint into project-local cache with progress tracking."""
-    logger.info("Downloading checkpoint: %s (target cache: %s)", model_id, HF_HOME)
+    hub_cache = HF_HOME / "hub"
+    logger.info("Downloading checkpoint: %s (target cache: %s)", model_id, hub_cache)
     path = snapshot_download(
         repo_id=model_id,
         token=os.environ.get("HF_TOKEN"),
+        cache_dir=str(hub_cache),
     )
     logger.info("Successfully cached %s -> %s", model_id, path)
 
@@ -75,8 +79,12 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    models_to_download = [args.model] if args.model else (EMBEDDING_MODELS + BASE_MODELS)
-    tasks_to_download = [args.task] if args.task else (RETRIEVAL_TASKS + SIMILARITY_TASKS)
+    models_to_download = (
+        [args.model] if args.model else (EMBEDDING_MODELS + BASE_MODELS)
+    )
+    tasks_to_download = (
+        [args.task] if args.task else (RETRIEVAL_TASKS + SIMILARITY_TASKS)
+    )
 
     if not args.tasks_only:
         for model_id in models_to_download:

@@ -39,11 +39,14 @@ def load_retrieval_dataset(task_name: str) -> RetrievalDataset:
 
     # Prepend non-empty title to body text with a space according to standard BEIR protocol
     doc_texts = [
-        f"{t} {x}".strip() if t else x
-        for t, x in zip(corpus["title"], corpus["text"])
+        f"{t} {x}".strip() if t else x for t, x in zip(corpus["title"], corpus["text"])
     ]
 
-    instruction = task.metadata.prompt.get("query", "") if task.metadata and task.metadata.prompt else ""
+    instruction = (
+        task.metadata.prompt.get("query", "")
+        if task.metadata and task.metadata.prompt
+        else ""
+    )
 
     logger.info(
         "Loaded %s: %d documents, %d queries, %d qrel entries",

@@ -20,8 +20,16 @@ def compute_similarity_metrics(
     Returns:
         Dictionary containing 'spearman_rho' and 'pearson_r', each scaled by 100 in [-100.0, 100.0].
     """
-    p = predictions.detach().cpu().numpy() if isinstance(predictions, torch.Tensor) else np.asarray(predictions)
-    t = targets.detach().cpu().numpy() if isinstance(targets, torch.Tensor) else np.asarray(targets)
+    p = (
+        predictions.detach().cpu().numpy()
+        if isinstance(predictions, torch.Tensor)
+        else np.asarray(predictions)
+    )
+    t = (
+        targets.detach().cpu().numpy()
+        if isinstance(targets, torch.Tensor)
+        else np.asarray(targets)
+    )
 
     spearman_res, _ = scipy.stats.spearmanr(p, t)
     pearson_res, _ = scipy.stats.pearsonr(p, t)

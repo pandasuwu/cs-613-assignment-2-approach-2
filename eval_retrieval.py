@@ -44,7 +44,9 @@ def evaluate_retrieval_for_method(
     for i in range(0, num_queries, batch_size_search):
         q_batch = queries[i : i + batch_size_search].to(device)
         scores_batch = torch.matmul(q_batch, corpus_dev.T)  # (batch_size, num_docs)
-        topk_scores, topk_indices = torch.topk(scores_batch, k=min(100, corpus.shape[0]), dim=1)
+        topk_scores, topk_indices = torch.topk(
+            scores_batch, k=min(100, corpus.shape[0]), dim=1
+        )
         topk_scores_cpu = topk_scores.cpu()
         topk_indices_cpu = topk_indices.cpu()
 
@@ -80,11 +82,16 @@ def evaluate_retrieval_combination(
 
     # 1. Full-Dimension Transforms
     for method in FULL_METHODS:
-        csv_path = get_result_dir("retrieval", task_name, model_id, "full", pooling=pooling) / f"{method}.csv"
+        csv_path = (
+            get_result_dir("retrieval", task_name, model_id, "full", pooling=pooling)
+            / f"{method}.csv"
+        )
         if csv_path.exists() and not overwrite:
             continue
 
-        trans_dir = get_transformed_cache_dir(task_name, model_id, "full", method, pooling=pooling)
+        trans_dir = get_transformed_cache_dir(
+            task_name, model_id, "full", method, pooling=pooling
+        )
         c_file = trans_dir / "corpus.pt"
         q_file = trans_dir / "queries.pt"
         if not (c_file.exists() and q_file.exists()):
@@ -94,22 +101,40 @@ def evaluate_retrieval_combination(
         queries = torch.load(q_file, weights_only=True)
 
         res = evaluate_retrieval_for_method(
-            corpus, queries, qids, dids, qrels, csv_path, batch_size_search=batch_size_search
+            corpus,
+            queries,
+            qids,
+            dids,
+            qrels,
+            csv_path,
+            batch_size_search=batch_size_search,
         )
         logger.info(
             "[%s | %s | full | %s] nDCG@10=%.4f  Recall@100=%.4f  MRR@10=%.4f",
-            task_name, model_id, method, res["ndcg_at_10"], res["recall_at_100"], res["mrr_at_10"]
+            task_name,
+            model_id,
+            method,
+            res["ndcg_at_10"],
+            res["recall_at_100"],
+            res["mrr_at_10"],
         )
 
     # 2. Compression Transforms
     for method in COMPRESSION_METHODS:
         for k in COMPRESSION_LADDER_K:
             sub_name = f"{method}_k{k}"
-            csv_path = get_result_dir("retrieval", task_name, model_id, "compression", pooling=pooling) / f"{sub_name}.csv"
+            csv_path = (
+                get_result_dir(
+                    "retrieval", task_name, model_id, "compression", pooling=pooling
+                )
+                / f"{sub_name}.csv"
+            )
             if csv_path.exists() and not overwrite:
                 continue
 
-            trans_dir = get_transformed_cache_dir(task_name, model_id, "compression", sub_name, pooling=pooling)
+            trans_dir = get_transformed_cache_dir(
+                task_name, model_id, "compression", sub_name, pooling=pooling
+            )
             c_file = trans_dir / "corpus.pt"
             q_file = trans_dir / "queries.pt"
             if not (c_file.exists() and q_file.exists()):
@@ -123,23 +148,58 @@ def evaluate_retrieval_combination(
                 with open(trans_dir / "gamma.json", encoding="utf-8") as gf:
                     gamma_val = json.load(gf).get("gamma")
 
-            extra = {"k": k, "gamma": f"{gamma_val:.4f}" if gamma_val is not None else ""}
+            extra = {
+                "k": k,
+                "gamma": f"{gamma_val:.4f}" if gamma_val is not None else "",
+            }
             res = evaluate_retrieval_for_method(
-                corpus, queries, qids, dids, qrels, csv_path, batch_size_search=batch_size_search, extra_cols=extra
+                corpus,
+                queries,
+                qids,
+                dids,
+                qrels,
+                csv_path,
+                batch_size_search=batch_size_search,
+                extra_cols=extra,
             )
             logger.info(
                 "[%s | %s | compression | %s] nDCG@10=%.4f  Recall@100=%.4f  MRR@10=%.4f",
-                task_name, model_id, sub_name, res["ndcg_at_10"], res["recall_at_100"], res["mrr_at_10"]
+                task_name,
+                model_id,
+                sub_name,
+                res["ndcg_at_10"],
+                res["recall_at_100"],
+                res["mrr_at_10"],
             )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Stage 3: Information Retrieval evaluation (nDCG@10, Recall@100, MRR@10).")
-    parser.add_argument("--model", type=str, default=None, help="Model ID. Default: all models.")
-    parser.add_argument("--task", type=str, default=None, help="Task name. Default: all retrieval tasks.")
-    parser.add_argument("--pooling", type=str, default=None, help="Pooling mode for base LLMs.")
-    parser.add_argument("--overwrite", action="store_true", help="Re-evaluate and overwrite existing CSVs.")
-    parser.add_argument("--batch-size-search", type=int, default=DEFAULT_BATCH_SIZE_SEARCH, help="Batch size for similarity ranking.")
+    parser = argparse.ArgumentParser(
+        description="Stage 3: Information Retrieval evaluation (nDCG@10, Recall@100, MRR@10)."
+    )
+    parser.add_argument(
+        "--model", type=str, default=None, help="Model ID. Default: all models."
+    )
+    parser.add_argument(
+        "--task",
+        type=str,
+        default=None,
+        help="Task name. Default: all retrieval tasks.",
+    )
+    parser.add_argument(
+        "--pooling", type=str, default=None, help="Pooling mode for base LLMs."
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Re-evaluate and overwrite existing CSVs.",
+    )
+    parser.add_argument(
+        "--batch-size-search",
+        type=int,
+        default=DEFAULT_BATCH_SIZE_SEARCH,
+        help="Batch size for similarity ranking.",
+    )
 
     args = parser.parse_args()
 
@@ -147,7 +207,11 @@ def main() -> None:
     tasks_to_run = [args.task] if args.task else RETRIEVAL_TASKS
 
     for model_id in models_to_run:
-        poolings = [args.pooling] if args.pooling else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
+        poolings = (
+            [args.pooling]
+            if args.pooling
+            else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
+        )
         for task_name in tasks_to_run:
             for pool_mode in poolings:
                 evaluate_retrieval_combination(

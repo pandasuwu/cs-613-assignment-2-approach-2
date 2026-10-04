@@ -18,7 +18,9 @@ def encode_base_texts(
 ) -> torch.Tensor:
     """Encode text strings into L2-normalized FP32 representations using a base language model."""
     if pooling not in ["mean", "last_token"]:
-        raise ValueError(f"Unsupported pooling mode: '{pooling}'. Must be 'mean' or 'last_token'.")
+        raise ValueError(
+            f"Unsupported pooling mode: '{pooling}'. Must be 'mean' or 'last_token'."
+        )
 
     device = next(model.parameters()).device
     padding_side = getattr(tokenizer, "padding_side", "right")
@@ -27,7 +29,11 @@ def encode_base_texts(
     num_texts = len(texts)
     iterator = range(0, num_texts, batch_size)
     if show_progress:
-        iterator = tqdm(iterator, desc=f"Encoding (base, {pooling})", total=(num_texts + batch_size - 1) // batch_size)
+        iterator = tqdm(
+            iterator,
+            desc=f"Encoding (base, {pooling})",
+            total=(num_texts + batch_size - 1) // batch_size,
+        )
 
     for i in iterator:
         batch_texts = texts[i : i + batch_size]
@@ -48,11 +54,15 @@ def encode_base_texts(
         if pooling == "mean":
             pooled = mean_pooling(hidden_states, attention_mask)
         else:
-            pooled = last_token_pooling(hidden_states, attention_mask, padding_side=padding_side)
+            pooled = last_token_pooling(
+                hidden_states, attention_mask, padding_side=padding_side
+            )
 
         normalized = F.normalize(pooled, p=2, dim=1)
         embeddings_list.append(normalized.detach().cpu().to(torch.float32))
 
     result = torch.cat(embeddings_list, dim=0)
-    logger.info("Encoded %d texts -> tensor shape %s (FP32)", len(texts), tuple(result.shape))
+    logger.info(
+        "Encoded %d texts -> tensor shape %s (FP32)", len(texts), tuple(result.shape)
+    )
     return result

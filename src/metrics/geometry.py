@@ -56,7 +56,9 @@ def compute_geometry_metrics(
         Dictionary containing centroid_norm, average_cosine, mev_top1, nid_spectral_entropy, isoscore.
     """
     centroid_norm = compute_centroid_norm(x)
-    average_cosine = compute_average_cosine(x, max_samples=max_cosine_samples, seed=seed)
+    average_cosine = compute_average_cosine(
+        x, max_samples=max_cosine_samples, seed=seed
+    )
 
     # Compute covariance eigenspectrum once for mev, nid, and isoscore
     eigenvalues = torch.clamp(torch.linalg.eigvalsh(torch.cov(x.T)), min=0.0)
@@ -95,7 +97,9 @@ def compute_geometry_metrics(
         isotropy_defect = l2_distance / normalization_constant
         defect_term = (isotropy_defect**2) * (d - math.sqrt(d))
         raw_score = ((d - defect_term) ** 2 - d) / (d * (d - 1))
-        isoscore = float(torch.clamp(raw_score, min=0.0, max=1.0).item()) if d > 1 else 1.0
+        isoscore = (
+            float(torch.clamp(raw_score, min=0.0, max=1.0).item()) if d > 1 else 1.0
+        )
 
     return {
         "centroid_norm": centroid_norm,
@@ -119,4 +123,3 @@ def compute_nid(x: torch.Tensor) -> float:
 def compute_isoscore(points: torch.Tensor) -> float:
     """Compute IsoScore measuring covariance diagonal defect from identity (Rudman et al., 2022)."""
     return compute_geometry_metrics(points)["isoscore"]
-

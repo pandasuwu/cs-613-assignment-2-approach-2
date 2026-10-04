@@ -46,11 +46,16 @@ def evaluate_geometry_combination(
 
     # 1. Full-Dimension Transforms (including baseline)
     for method in FULL_METHODS:
-        csv_path = get_result_dir("geometry", task_name, model_id, "full", pooling=pooling) / f"{method}.csv"
+        csv_path = (
+            get_result_dir("geometry", task_name, model_id, "full", pooling=pooling)
+            / f"{method}.csv"
+        )
         if csv_path.exists() and not overwrite:
             continue
 
-        trans_dir = get_transformed_cache_dir(task_name, model_id, "full", method, pooling=pooling)
+        trans_dir = get_transformed_cache_dir(
+            task_name, model_id, "full", method, pooling=pooling
+        )
         if is_retrieval:
             tensor_file = trans_dir / "corpus.pt"
             if not tensor_file.exists():
@@ -68,19 +73,32 @@ def evaluate_geometry_combination(
         res = evaluate_geometry_for_tensor(tensor, csv_path)
         logger.info(
             "[%s | %s | full | %s] Centroid=%.4f  AvgCos=%.4f  MEV=%.4f  NID=%.4f  IsoScore=%.4f",
-            task_name, model_id, method,
-            res["centroid_norm"], res["average_cosine"], res["mev_top1"], res["nid_spectral_entropy"], res["isoscore"]
+            task_name,
+            model_id,
+            method,
+            res["centroid_norm"],
+            res["average_cosine"],
+            res["mev_top1"],
+            res["nid_spectral_entropy"],
+            res["isoscore"],
         )
 
     # 2. Compression Transforms
     for method in COMPRESSION_METHODS:
         for k in COMPRESSION_LADDER_K:
             sub_name = f"{method}_k{k}"
-            csv_path = get_result_dir("geometry", task_name, model_id, "compression", pooling=pooling) / f"{sub_name}.csv"
+            csv_path = (
+                get_result_dir(
+                    "geometry", task_name, model_id, "compression", pooling=pooling
+                )
+                / f"{sub_name}.csv"
+            )
             if csv_path.exists() and not overwrite:
                 continue
 
-            trans_dir = get_transformed_cache_dir(task_name, model_id, "compression", sub_name, pooling=pooling)
+            trans_dir = get_transformed_cache_dir(
+                task_name, model_id, "compression", sub_name, pooling=pooling
+            )
             if is_retrieval:
                 tensor_file = trans_dir / "corpus.pt"
                 if not tensor_file.exists():
@@ -98,17 +116,35 @@ def evaluate_geometry_combination(
             res = evaluate_geometry_for_tensor(tensor, csv_path, extra_cols={"k": k})
             logger.info(
                 "[%s | %s | compression | %s] Centroid=%.4f  AvgCos=%.4f  MEV=%.4f  NID=%.4f  IsoScore=%.4f",
-                task_name, model_id, sub_name,
-                res["centroid_norm"], res["average_cosine"], res["mev_top1"], res["nid_spectral_entropy"], res["isoscore"]
+                task_name,
+                model_id,
+                sub_name,
+                res["centroid_norm"],
+                res["average_cosine"],
+                res["mev_top1"],
+                res["nid_spectral_entropy"],
+                res["isoscore"],
             )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Stage 3: Intrinsic space geometry diagnostics (Centroid, AvgCos, MEV, NID, IsoScore).")
-    parser.add_argument("--model", type=str, default=None, help="Model ID. Default: all models.")
-    parser.add_argument("--task", type=str, default=None, help="Task name. Default: all tasks.")
-    parser.add_argument("--pooling", type=str, default=None, help="Pooling mode for base LLMs.")
-    parser.add_argument("--overwrite", action="store_true", help="Re-evaluate and overwrite existing CSVs.")
+    parser = argparse.ArgumentParser(
+        description="Stage 3: Intrinsic space geometry diagnostics (Centroid, AvgCos, MEV, NID, IsoScore)."
+    )
+    parser.add_argument(
+        "--model", type=str, default=None, help="Model ID. Default: all models."
+    )
+    parser.add_argument(
+        "--task", type=str, default=None, help="Task name. Default: all tasks."
+    )
+    parser.add_argument(
+        "--pooling", type=str, default=None, help="Pooling mode for base LLMs."
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Re-evaluate and overwrite existing CSVs.",
+    )
 
     args = parser.parse_args()
 
@@ -116,7 +152,11 @@ def main() -> None:
     tasks_to_run = [args.task] if args.task else (RETRIEVAL_TASKS + SIMILARITY_TASKS)
 
     for model_id in models_to_run:
-        poolings = [args.pooling] if args.pooling else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
+        poolings = (
+            [args.pooling]
+            if args.pooling
+            else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
+        )
         for task_name in tasks_to_run:
             for pool_mode in poolings:
                 evaluate_geometry_combination(

@@ -21,7 +21,11 @@ def encode_embedding_queries(
     """
     logger.info("Encoding %d queries with model '%s'", len(texts), model_id)
 
-    prompt = f"Instruct: {instruction}\nQuery: " if ("qwen" in model_id.lower() and instruction) else None
+    prompt = (
+        f"Instruct: {instruction}\nQuery: "
+        if ("qwen" in model_id.lower() and instruction)
+        else None
+    )
 
     embeddings = model.encode_query(
         texts,

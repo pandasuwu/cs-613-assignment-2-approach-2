@@ -29,7 +29,8 @@ def calculate_snr_curve(
     noise_variance = torch.mean(eigenvalues[tail_start:])
 
     snr_curve = torch.clamp(
-        (eigenvalues[:tail_start] - noise_variance) / torch.clamp(noise_variance, min=1e-12),
+        (eigenvalues[:tail_start] - noise_variance)
+        / torch.clamp(noise_variance, min=1e-12),
         min=0.0,
     )
     return snr_curve, noise_variance
@@ -122,7 +123,9 @@ def transform_spectemp(
     mu, eigenvalues, eigenvectors = compute_mean_and_cov(calib_data)
 
     if gamma is None:
-        gamma_val = find_optimal_gamma(eigenvalues, target_dim=target_dim, kneedle_s=kneedle_s)
+        gamma_val = find_optimal_gamma(
+            eigenvalues, target_dim=target_dim, kneedle_s=kneedle_s
+        )
     else:
         gamma_val = float(gamma)
 
