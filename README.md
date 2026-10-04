@@ -45,7 +45,7 @@ Compression Transforms (d to k for k in 512, 256, 128, 64):
 - Similarity: Spearman rank correlation rho (primary), Pearson correlation r
 - Intrinsic Geometry: centroid_norm, average_cosine, mev_top1, nid_spectral_entropy, isoscore
 
-## Setup
+## Setup and Environment
 
 Requires Python 3.14 and uv:
 
@@ -53,7 +53,32 @@ Requires Python 3.14 and uv:
 uv sync
 ```
 
-All models, tokenizers, and datasets are isolated in project-local cache/ directory.
+### Hugging Face Authentication
+
+Models like `google/gemma-3-1b-pt` require accepting user license agreements on Hugging Face. Supply your access token via:
+
+```bash
+export HF_TOKEN="your_hf_token_here"
+```
+
+If you previously logged in with `huggingface-cli login`, the pipeline non-destructively reads and inherits your token from `~/.cache/huggingface/token`.
+
+### Localized Cache Isolation
+
+All model checkpoints, tokenizers, and datasets are strictly isolated within the project-local `cache/huggingface` directory. User home directories are never polluted.
+
+### Pre-Downloading Assets (Optional)
+
+To download and verify all models and datasets into local cache prior to running experiments:
+
+```bash
+# Pre-download all 4 models and 7 datasets
+uv run download.py
+
+# Pre-download a specific model or dataset
+uv run download.py --model google/embeddinggemma-300m
+uv run download.py --task FiQA2018
+```
 
 ## Execution Pipeline
 
@@ -61,7 +86,7 @@ The execution operates in three decoupled, resumable stages.
 
 ### Stage 1: Encode and Cache Raw Representations
 
-Extracts representations once per model, task, and pooling mode into cache/embeddings/:
+Extracts representations once per model, task, and pooling mode into `cache/embeddings/`:
 
 ```bash
 # Run all models and core tasks
@@ -86,7 +111,7 @@ uv run transform.py --model google/embeddinggemma-300m --task FiQA2018
 
 ### Stage 3: Evaluation and Metric Generation
 
-Evaluates transformed representations and writes atomic CSV leaves into results/:
+Evaluates transformed representations and writes atomic CSV leaves into `results/`:
 
 ```bash
 # Evaluate information retrieval
