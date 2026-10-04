@@ -1,4 +1,5 @@
 import argparse
+import gc
 import json
 from typing import Any
 
@@ -121,6 +122,17 @@ def main() -> None:
                     loaded_model=loaded_model,
                     loaded_tokenizer=loaded_tokenizer,
                 )
+
+        # Offload model to CPU and clear accelerator cache to prevent memory contention between models
+        if loaded_model is not None:
+            if hasattr(loaded_model, "to"):
+                loaded_model.to("cpu")
+            del loaded_model, loaded_tokenizer
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            elif torch.backends.mps.is_available():
+                torch.mps.empty_cache()
 
 
 if __name__ == "__main__":
