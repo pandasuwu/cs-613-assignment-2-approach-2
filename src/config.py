@@ -42,10 +42,10 @@ SEED: int = 2026
 MAX_SEQ_LENGTH: int = 2048
 DTYPE: torch.dtype = torch.float32
 
-# Batch sizes optimized for Apple Silicon MPS (M3 Max 30-core GPU) and high-throughput execution
-DEFAULT_BATCH_SIZE_DOCS: int = 64
-DEFAULT_BATCH_SIZE_QUERIES: int = 128
-DEFAULT_BATCH_SIZE_SEARCH: int = 512
+# Batch sizes optimized for memory safety and steady throughput on Apple Silicon MPS
+DEFAULT_BATCH_SIZE_DOCS: int = 16
+DEFAULT_BATCH_SIZE_QUERIES: int = 64
+DEFAULT_BATCH_SIZE_SEARCH: int = 256
 
 
 def set_seed(seed: int = SEED) -> None:
