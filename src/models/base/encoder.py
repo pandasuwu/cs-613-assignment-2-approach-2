@@ -61,6 +61,11 @@ def encode_base_texts(
         normalized = F.normalize(pooled, p=2, dim=1)
         embeddings_list.append(normalized.detach().cpu().to(torch.float32))
 
+        # Explicitly release GPU tensor references to prevent MPS allocator memory accumulation
+        del outputs, hidden_states, pooled, normalized, input_ids, attention_mask
+        if (i // batch_size) % 50 == 0 and torch.backends.mps.is_available():
+            torch.mps.empty_cache()
+
     result = torch.cat(embeddings_list, dim=0)
     logger.info(
         "Encoded %d texts -> tensor shape %s (FP32)", len(texts), tuple(result.shape)
