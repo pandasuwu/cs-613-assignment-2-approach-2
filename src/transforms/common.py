@@ -44,7 +44,10 @@ def compute_mean_and_cov(
     """
     mu = torch.mean(x, dim=0)
     cov = torch.cov(x.T)
-    eigenvalues, eigenvectors = torch.linalg.eigh(cov)
+    # Perform symmetric eigendecomposition on CPU to avoid MPS threadgroup staging limits
+    eigenvalues, eigenvectors = torch.linalg.eigh(cov.cpu())
+    eigenvalues = eigenvalues.to(x.device)
+    eigenvectors = eigenvectors.to(x.device)
 
     # Numerical projection onto the positive semi-definite cone
     eigenvalues = torch.clamp(eigenvalues, min=0.0)

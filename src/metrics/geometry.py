@@ -60,8 +60,8 @@ def compute_geometry_metrics(
         x, max_samples=max_cosine_samples, seed=seed
     )
 
-    # Compute covariance eigenspectrum once for mev, nid, and isoscore
-    eigenvalues = torch.clamp(torch.linalg.eigvalsh(torch.cov(x.T)), min=0.0)
+    # Compute covariance eigenspectrum once for mev, nid, and isoscore on CPU
+    eigenvalues = torch.clamp(torch.linalg.eigvalsh(torch.cov(x.T).cpu()), min=0.0).to(x.device)
     d = eigenvalues.shape[0]
 
     total_var = eigenvalues.sum()

@@ -28,7 +28,6 @@ RETRIEVAL_TASKS: list[str] = [
     "FiQA2018",  # Financial question answering (57k docs, 648 queries)
     "ArguAna",  # Counter-argument retrieval (8.6k docs, 1406 queries)
     "SCIDOCS",  # Scientific citation search (25.6k docs, 1000 queries)
-    "TRECCOVID",  # Biomedical literature search (171k docs, 50 queries)
 ]
 
 # Semantic textual similarity benchmarks (symmetric pair scoring):

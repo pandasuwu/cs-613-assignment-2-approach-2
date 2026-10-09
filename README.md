@@ -15,7 +15,7 @@ Base Language Models (evaluated under mean and last-token pooling):
 ## Benchmarks (MTEB v2 English)
 
 Information Retrieval:
-- FiQA2018, ArguAna, SCIDOCS, TRECCOVID
+- FiQA2018, ArguAna, SCIDOCS (core evaluation matrix; TRECCOVID pre-cached)
 
 Semantic Textual Similarity (STS):
 - STSBenchmark, SICK-R, STS22.v2
