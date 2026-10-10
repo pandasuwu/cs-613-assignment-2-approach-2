@@ -1,0 +1,6 @@
+geometry_metric,ir_ndcg_pearson_r,ir_ndcg_p_val,ir_ndcg_spearman_rho,sts_spearman_pearson_r,sts_spearman_p_val,sts_spearman_spearman_rho
+centroid_norm,-0.1061,0.1563,-0.3541,-0.139,0.0627,-0.3156
+average_cosine,-0.1342,0.0724,-0.4861,-0.1617,0.0301,-0.2199
+mev_top1,-0.483,0.0,-0.5621,-0.4238,0.0,-0.534
+nid_spectral_entropy,0.4815,0.0,0.4698,0.4376,0.0,0.565
+isoscore,0.261,0.0004,0.5267,0.2615,0.0004,0.5964
