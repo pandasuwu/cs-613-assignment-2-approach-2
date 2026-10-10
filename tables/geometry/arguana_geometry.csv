@@ -1,0 +1,91 @@
+model,method,centroid_norm,average_cosine,mev_top1,nid_spectral_entropy,isoscore
+Qwen/Qwen3-Embedding-0.6B,abtt_1,0.0045,-0.0001,0.0334,0.8074,0.1273
+Qwen/Qwen3-Embedding-0.6B,abtt_2,0.0046,-0.0001,0.0273,0.8135,0.1394
+Qwen/Qwen3-Embedding-0.6B,abtt_3,0.0049,-0.0001,0.0242,0.8178,0.1478
+Qwen/Qwen3-Embedding-0.6B,baseline,0.4703,0.2193,0.0388,0.8,0.1135
+Qwen/Qwen3-Embedding-0.6B,mc,0.0,-0.0001,0.0388,0.8,0.1135
+Qwen/Qwen3-Embedding-0.6B,pca,0.0051,0.0,0.053,0.9318,0.4968
+Qwen/Qwen3-Embedding-0.6B,prefix,0.5325,0.2798,0.0639,0.8907,0.38
+Qwen/Qwen3-Embedding-0.6B,r1,0.0043,-0.0001,0.0391,0.7995,0.1128
+Qwen/Qwen3-Embedding-0.6B,r2,0.0029,-0.0001,0.0392,0.7997,0.1127
+Qwen/Qwen3-Embedding-0.6B,rand,0.4705,0.2195,0.0388,0.7999,0.1135
+Qwen/Qwen3-Embedding-0.6B,random_truncation,0.5022,0.2506,0.0477,0.9255,0.5027
+Qwen/Qwen3-Embedding-0.6B,soft_zca,0.0031,-0.0001,0.0021,0.9758,0.7712
+Qwen/Qwen3-Embedding-0.6B,spectemp,0.0048,-0.0,0.0344,0.9649,0.6889
+Qwen/Qwen3-Embedding-0.6B,standardization,0.0043,-0.0,0.0344,0.8094,0.1265
+Qwen/Qwen3-Embedding-0.6B,whitening,0.0049,-0.0,0.0089,0.9998,0.998
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),abtt_1,0.0291,0.0001,0.1132,0.7177,0.0376
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),abtt_2,0.0245,0.0002,0.0727,0.751,0.0596
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),abtt_3,0.0235,0.0003,0.0467,0.7693,0.0765
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),baseline,0.8123,0.6583,0.2632,0.6149,0.0108
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),mc,0.0,0.0008,0.2632,0.6149,0.0108
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),pca,0.0289,0.0012,0.3045,0.7031,0.0626
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),prefix,0.8175,0.6654,0.343,0.6616,0.0509
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),r1,0.0247,0.0008,0.2639,0.6111,0.0107
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),r2,0.0213,0.0006,0.265,0.612,0.0107
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),rand,0.8124,0.6585,0.2631,0.6148,0.0108
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),random_truncation,0.7432,0.5475,0.2698,0.7517,0.0824
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),soft_zca,0.011,-0.0001,0.006,0.9502,0.5813
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),spectemp,0.0232,0.0006,0.2218,0.7917,0.112
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),standardization,0.0218,0.0006,0.1998,0.6619,0.0173
+Qwen/Qwen3.5-0.8B-Base (last_token_pooling),whitening,0.018,0.0,0.0165,0.9963,0.9634
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),abtt_1,0.0158,0.0002,0.0816,0.6874,0.0412
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),abtt_2,0.0146,0.0002,0.0635,0.7051,0.0495
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),abtt_3,0.0144,0.0001,0.0559,0.717,0.0552
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),baseline,0.8992,0.807,0.1086,0.6606,0.0309
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),mc,0.0,0.0002,0.1086,0.6606,0.0309
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),pca,0.0171,0.0003,0.1203,0.8074,0.1926
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),prefix,0.9167,0.8387,0.1428,0.7273,0.1368
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),r1,0.0158,0.0002,0.1059,0.6615,0.0314
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),r2,0.014,0.0002,0.1062,0.6612,0.0313
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),rand,0.8992,0.8071,0.1086,0.6605,0.0309
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),random_truncation,0.9026,0.813,0.1272,0.8036,0.1889
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),soft_zca,0.0074,-0.0001,0.0045,0.9291,0.4733
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),spectemp,0.0166,0.0002,0.0867,0.8688,0.2932
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),standardization,0.0142,0.0002,0.0877,0.6946,0.0404
+Qwen/Qwen3.5-0.8B-Base (mean_pooling),whitening,0.0112,-0.0,0.0097,0.9988,0.9889
+google/embeddinggemma-300m,abtt_1,0.0048,-0.0001,0.0312,0.8469,0.1839
+google/embeddinggemma-300m,abtt_2,0.0052,-0.0001,0.0232,0.8526,0.2005
+google/embeddinggemma-300m,abtt_3,0.0042,-0.0001,0.0229,0.8559,0.2088
+google/embeddinggemma-300m,baseline,0.4582,0.2084,0.0349,0.8411,0.1679
+google/embeddinggemma-300m,mc,0.0,-0.0001,0.0349,0.8411,0.1679
+google/embeddinggemma-300m,pca,0.0041,-0.0,0.049,0.9358,0.5177
+google/embeddinggemma-300m,prefix,0.5834,0.3395,0.0431,0.939,0.5509
+google/embeddinggemma-300m,r1,0.0045,-0.0001,0.035,0.8401,0.1661
+google/embeddinggemma-300m,r2,0.0036,-0.0001,0.0352,0.8407,0.167
+google/embeddinggemma-300m,rand,0.4581,0.2083,0.0349,0.841,0.1679
+google/embeddinggemma-300m,random_truncation,0.4594,0.2096,0.044,0.9348,0.5389
+google/embeddinggemma-300m,soft_zca,0.0036,-0.0001,0.0022,0.9827,0.8573
+google/embeddinggemma-300m,spectemp,0.0042,-0.0001,0.0241,0.9812,0.8183
+google/embeddinggemma-300m,standardization,0.0045,-0.0001,0.0333,0.8424,0.172
+google/embeddinggemma-300m,whitening,0.0045,-0.0,0.0087,0.9998,0.9983
+google/gemma-3-1b-pt (last_token_pooling),abtt_1,0.0229,0.0,0.0668,0.7639,0.061
+google/gemma-3-1b-pt (last_token_pooling),abtt_2,0.0219,0.0001,0.0422,0.7807,0.0778
+google/gemma-3-1b-pt (last_token_pooling),abtt_3,0.0202,0.0001,0.0412,0.7894,0.0854
+google/gemma-3-1b-pt (last_token_pooling),baseline,0.7839,0.6113,0.2358,0.6654,0.0128
+google/gemma-3-1b-pt (last_token_pooling),mc,0.0,-0.0,0.2358,0.6654,0.0128
+google/gemma-3-1b-pt (last_token_pooling),pca,0.0166,0.0001,0.2896,0.7473,0.0737
+google/gemma-3-1b-pt (last_token_pooling),prefix,0.6491,0.4198,0.2655,0.773,0.0882
+google/gemma-3-1b-pt (last_token_pooling),r1,0.0163,-0.0,0.2379,0.6607,0.0126
+google/gemma-3-1b-pt (last_token_pooling),r2,0.0141,-0.0001,0.2386,0.6613,0.0125
+google/gemma-3-1b-pt (last_token_pooling),rand,0.7839,0.6114,0.2359,0.6653,0.0128
+google/gemma-3-1b-pt (last_token_pooling),random_truncation,0.7483,0.5573,0.2893,0.7452,0.0739
+google/gemma-3-1b-pt (last_token_pooling),soft_zca,0.0092,-0.0001,0.0047,0.9606,0.629
+google/gemma-3-1b-pt (last_token_pooling),spectemp,0.0154,-0.0,0.209,0.8266,0.1338
+google/gemma-3-1b-pt (last_token_pooling),standardization,0.0119,-0.0,0.1661,0.7287,0.0239
+google/gemma-3-1b-pt (last_token_pooling),whitening,0.0137,-0.0,0.0138,0.9978,0.9786
+google/gemma-3-1b-pt (mean_pooling),abtt_1,0.02,0.0003,0.0697,0.7125,0.0451
+google/gemma-3-1b-pt (mean_pooling),abtt_2,0.015,0.0,0.0604,0.728,0.0532
+google/gemma-3-1b-pt (mean_pooling),abtt_3,0.013,-0.0,0.0472,0.7407,0.0611
+google/gemma-3-1b-pt (mean_pooling),baseline,0.926,0.8569,0.0954,0.6887,0.0342
+google/gemma-3-1b-pt (mean_pooling),mc,0.0,0.0004,0.0954,0.6887,0.0342
+google/gemma-3-1b-pt (mean_pooling),pca,0.021,0.0005,0.1096,0.8303,0.2196
+google/gemma-3-1b-pt (mean_pooling),prefix,0.6497,0.4149,0.1686,0.8035,0.1561
+google/gemma-3-1b-pt (mean_pooling),r1,0.0188,0.0004,0.0924,0.6889,0.0347
+google/gemma-3-1b-pt (mean_pooling),r2,0.0176,0.0003,0.0927,0.6888,0.0347
+google/gemma-3-1b-pt (mean_pooling),rand,0.9261,0.857,0.0954,0.6887,0.0342
+google/gemma-3-1b-pt (mean_pooling),random_truncation,0.973,0.9465,0.1989,0.7674,0.1218
+google/gemma-3-1b-pt (mean_pooling),soft_zca,0.008,-0.0001,0.0047,0.9277,0.4458
+google/gemma-3-1b-pt (mean_pooling),spectemp,0.019,0.0003,0.0736,0.8956,0.3569
+google/gemma-3-1b-pt (mean_pooling),standardization,0.0142,0.0002,0.0572,0.759,0.0649
+google/gemma-3-1b-pt (mean_pooling),whitening,0.0118,0.0,0.01,0.9984,0.9852

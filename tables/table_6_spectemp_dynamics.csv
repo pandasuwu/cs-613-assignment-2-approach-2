@@ -1,7 +1,0 @@
-dataset,track,native_d,noise_floor_variance,kneedle_knee_point,gamma_k512,gamma_k256,gamma_k128,gamma_k64
-FiQA2018,retrieval,768,0.0,30,0.0586,0.1576,0.3092,0.5598
-ArguAna,retrieval,768,0.0,53,0.0524,0.1896,0.4388,0.8591
-SCIDOCS,retrieval,768,0.0,34,0.0613,0.192,0.3809,0.659
-STSBenchmark,similarity,768,0.0,24,0.0319,0.1291,0.2822,0.5082
-SICK-R,similarity,768,0.0,23,0.012,0.066,0.1892,0.4287
-STS22.v2,similarity,768,0.0,55,0.0,0.0988,0.4282,0.889

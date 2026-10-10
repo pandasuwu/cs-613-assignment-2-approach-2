@@ -1,0 +1,4 @@
+benchmark,raw_base_score,dedicated_baseline,initial_gap,best_deflation_method,best_deflation_score,deflation_gap_closed_pct,soft_zca_score,soft_zca_gap_closed_pct
+STSBenchmark,39.67,84.72,45.05,abtt_3,52.5,28.47,60.54,46.32
+SICK-R,47.44,80.67,33.23,abtt_2,57.41,30.0,59.95,37.67
+STS22.v2,59.49,68.07,8.58,abtt_3,59.44,-0.64,63.87,50.97

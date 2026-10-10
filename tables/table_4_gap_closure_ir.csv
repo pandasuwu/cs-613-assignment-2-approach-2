@@ -1,5 +1,0 @@
-benchmark,raw_base_score,dedicated_baseline,initial_gap,best_deflation_method,best_deflation_score,deflation_gap_closed_pct,soft_zca_score,soft_zca_gap_closed_pct
-FiQA2018,0.0504,0.4738,0.4234,abtt_3,0.0567,1.5046,0.0791,6.7949
-ArguAna,0.305,0.4816,0.1766,abtt_3,0.313,4.5573,0.361,31.7406
-SCIDOCS,0.0285,0.2194,0.1909,r2,0.0237,-2.5224,0.0607,16.9072
-Macro-Average,0.1279,0.3916,0.2636,abtt_3,0.1299,0.7428,0.167,14.8056

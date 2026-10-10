@@ -1,0 +1,7 @@
+dataset,track,native_d,leading_eigenvalue_lambda1,noise_floor_variance,snr_rank1,kneedle_knee_point,reference_knee_snr,gamma_k512,gamma_k256,gamma_k128,gamma_k64
+FiQA2018,retrieval,768,0.0333,0.0,2666.2944,30,339.0848,0.0586,0.1576,0.3092,0.5598
+ArguAna,retrieval,768,0.0276,0.0,3339.6475,53,398.4373,0.0524,0.1896,0.4388,0.8591
+SCIDOCS,retrieval,768,0.0285,0.0,2796.5898,34,331.4738,0.0613,0.192,0.3809,0.659
+STSBenchmark,similarity,768,0.0506,0.0,6270.2554,24,605.6478,0.0319,0.1291,0.2822,0.5082
+SICK-R,similarity,768,0.0488,0.0,16424.7422,23,1594.0776,0.012,0.066,0.1892,0.4287
+STS22.v2,similarity,768,0.026,0.0,26004152320.0,55,4480810496.0,0.0,0.0988,0.4282,0.889

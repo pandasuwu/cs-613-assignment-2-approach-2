@@ -1,0 +1,37 @@
+benchmark,track,metric,model,score_r1,score_r2,delta_r2_minus_r1,r2_wins
+ArguAna,retrieval,ndcg_at_10,Qwen/Qwen3-Embedding-0.6B,0.4829,0.4852,0.0023,true
+ArguAna,retrieval,ndcg_at_10,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),0.1078,0.108,0.0002,true
+ArguAna,retrieval,ndcg_at_10,Qwen/Qwen3.5-0.8B-Base (mean_pooling),0.2954,0.2952,-0.0002,false
+ArguAna,retrieval,ndcg_at_10,google/embeddinggemma-300m,0.476,0.4697,-0.0063,false
+ArguAna,retrieval,ndcg_at_10,google/gemma-3-1b-pt (last_token_pooling),0.1108,0.1121,0.0013,true
+ArguAna,retrieval,ndcg_at_10,google/gemma-3-1b-pt (mean_pooling),0.2988,0.2985,-0.0003,false
+FiQA2018,retrieval,ndcg_at_10,Qwen/Qwen3-Embedding-0.6B,0.4725,0.473,0.0006,true
+FiQA2018,retrieval,ndcg_at_10,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),0.0025,0.0028,0.0003,true
+FiQA2018,retrieval,ndcg_at_10,Qwen/Qwen3.5-0.8B-Base (mean_pooling),0.042,0.0433,0.0013,true
+FiQA2018,retrieval,ndcg_at_10,google/embeddinggemma-300m,0.4731,0.4765,0.0034,true
+FiQA2018,retrieval,ndcg_at_10,google/gemma-3-1b-pt (last_token_pooling),0.0225,0.0223,-0.0002,false
+FiQA2018,retrieval,ndcg_at_10,google/gemma-3-1b-pt (mean_pooling),0.0564,0.0572,0.0008,true
+SCIDOCS,retrieval,ndcg_at_10,Qwen/Qwen3-Embedding-0.6B,0.2403,0.2405,0.0002,true
+SCIDOCS,retrieval,ndcg_at_10,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),0.0048,0.0048,0.0,true
+SCIDOCS,retrieval,ndcg_at_10,Qwen/Qwen3.5-0.8B-Base (mean_pooling),0.0216,0.0229,0.0013,true
+SCIDOCS,retrieval,ndcg_at_10,google/embeddinggemma-300m,0.1992,0.1966,-0.0027,false
+SCIDOCS,retrieval,ndcg_at_10,google/gemma-3-1b-pt (last_token_pooling),0.0052,0.0055,0.0003,true
+SCIDOCS,retrieval,ndcg_at_10,google/gemma-3-1b-pt (mean_pooling),0.0222,0.0244,0.0021,true
+SICK-R,similarity,spearman_rho,Qwen/Qwen3-Embedding-0.6B,81.0241,81.0252,0.0011,true
+SICK-R,similarity,spearman_rho,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),52.0239,52.23,0.2061,true
+SICK-R,similarity,spearman_rho,Qwen/Qwen3.5-0.8B-Base (mean_pooling),52.0212,52.0669,0.0457,true
+SICK-R,similarity,spearman_rho,google/embeddinggemma-300m,79.7475,79.7704,0.0229,true
+SICK-R,similarity,spearman_rho,google/gemma-3-1b-pt (last_token_pooling),53.2194,53.3529,0.1335,true
+SICK-R,similarity,spearman_rho,google/gemma-3-1b-pt (mean_pooling),51.7219,51.7529,0.031,true
+STS22.v2,similarity,spearman_rho,Qwen/Qwen3-Embedding-0.6B,67.6125,67.5511,-0.0614,false
+STS22.v2,similarity,spearman_rho,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),15.3597,15.8196,0.4599,true
+STS22.v2,similarity,spearman_rho,Qwen/Qwen3.5-0.8B-Base (mean_pooling),58.1593,58.2848,0.1255,true
+STS22.v2,similarity,spearman_rho,google/embeddinggemma-300m,65.9011,66.016,0.1149,true
+STS22.v2,similarity,spearman_rho,google/gemma-3-1b-pt (last_token_pooling),13.3914,14.2179,0.8265,true
+STS22.v2,similarity,spearman_rho,google/gemma-3-1b-pt (mean_pooling),55.4454,55.3392,-0.1062,false
+STSBenchmark,similarity,spearman_rho,Qwen/Qwen3-Embedding-0.6B,84.7164,84.7883,0.0719,true
+STSBenchmark,similarity,spearman_rho,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),40.517,40.7045,0.1875,true
+STSBenchmark,similarity,spearman_rho,Qwen/Qwen3.5-0.8B-Base (mean_pooling),44.8101,45.0798,0.2697,true
+STSBenchmark,similarity,spearman_rho,google/embeddinggemma-300m,85.2696,85.4071,0.1375,true
+STSBenchmark,similarity,spearman_rho,google/gemma-3-1b-pt (last_token_pooling),47.2282,47.8718,0.6436,true
+STSBenchmark,similarity,spearman_rho,google/gemma-3-1b-pt (mean_pooling),44.2933,44.5773,0.284,true

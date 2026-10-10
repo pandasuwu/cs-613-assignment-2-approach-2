@@ -1,0 +1,37 @@
+track,dataset,model,r1,r2,rand,mc,random_truncation,pca,delta_r2_vs_rand,delta_r1_vs_mc,delta_pca_vs_randtrunc
+retrieval,ArguAna,Qwen/Qwen3-Embedding-0.6B,0.4829,0.4852,0.4931,0.4592,0.4445,0.473,-0.0079,0.0237,0.0285
+retrieval,ArguAna,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),0.1078,0.108,0.1063,0.0819,0.0964,0.098,0.0017,0.0259,0.0016
+retrieval,ArguAna,Qwen/Qwen3.5-0.8B-Base (mean_pooling),0.2954,0.2952,0.3163,0.1924,0.2911,0.2814,-0.0211,0.103,-0.0096
+retrieval,ArguAna,google/embeddinggemma-300m,0.476,0.4697,0.47,0.4778,0.4364,0.4639,-0.0003,-0.0018,0.0275
+retrieval,ArguAna,google/gemma-3-1b-pt (last_token_pooling),0.1108,0.1121,0.113,0.0939,0.098,0.0984,-0.0009,0.0169,0.0004
+retrieval,ArguAna,google/gemma-3-1b-pt (mean_pooling),0.2988,0.2985,0.2938,0.2299,0.2331,0.2704,0.0047,0.069,0.0373
+retrieval,FiQA2018,Qwen/Qwen3-Embedding-0.6B,0.4725,0.473,0.4726,0.4597,0.3844,0.4427,0.0005,0.0128,0.0583
+retrieval,FiQA2018,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),0.0025,0.0028,0.0026,0.0016,0.0021,0.0024,0.0003,0.0009,0.0002
+retrieval,FiQA2018,Qwen/Qwen3.5-0.8B-Base (mean_pooling),0.042,0.0433,0.0416,0.0126,0.0315,0.0283,0.0017,0.0294,-0.0032
+retrieval,FiQA2018,google/embeddinggemma-300m,0.4731,0.4765,0.4736,0.4539,0.3724,0.4126,0.0029,0.0192,0.0402
+retrieval,FiQA2018,google/gemma-3-1b-pt (last_token_pooling),0.0225,0.0223,0.0247,0.02,0.0123,0.017,-0.0024,0.0025,0.0047
+retrieval,FiQA2018,google/gemma-3-1b-pt (mean_pooling),0.0564,0.0572,0.0587,0.0181,0.0391,0.0329,-0.0015,0.0383,-0.0062
+retrieval,SCIDOCS,Qwen/Qwen3-Embedding-0.6B,0.2403,0.2405,0.244,0.2288,0.196,0.2228,-0.0035,0.0115,0.0268
+retrieval,SCIDOCS,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),0.0048,0.0048,0.0042,0.0053,0.0038,0.0033,0.0006,-0.0006,-0.0005
+retrieval,SCIDOCS,Qwen/Qwen3.5-0.8B-Base (mean_pooling),0.0216,0.0229,0.0267,0.0111,0.0258,0.0166,-0.0038,0.0105,-0.0092
+retrieval,SCIDOCS,google/embeddinggemma-300m,0.1992,0.1966,0.195,0.193,0.152,0.1649,0.0015,0.0062,0.0129
+retrieval,SCIDOCS,google/gemma-3-1b-pt (last_token_pooling),0.0052,0.0055,0.0058,0.0061,0.0059,0.0052,-0.0003,-0.0009,-0.0007
+retrieval,SCIDOCS,google/gemma-3-1b-pt (mean_pooling),0.0222,0.0244,0.0299,0.0093,0.0228,0.0153,-0.0055,0.0129,-0.0076
+similarity,SICK-R,Qwen/Qwen3-Embedding-0.6B,81.0241,81.0252,81.1659,77.4581,79.9422,81.834,-0.1407,3.566,1.8918
+similarity,SICK-R,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),52.0239,52.23,48.53,48.9806,47.855,51.1601,3.7,3.0433,3.3051
+similarity,SICK-R,Qwen/Qwen3.5-0.8B-Base (mean_pooling),52.0212,52.0669,48.2028,50.0896,48.4649,50.0842,3.8641,1.9316,1.6193
+similarity,SICK-R,google/embeddinggemma-300m,79.7475,79.7704,80.1713,75.2678,78.9924,78.4704,-0.4009,4.4797,-0.522
+similarity,SICK-R,google/gemma-3-1b-pt (last_token_pooling),53.2194,53.3529,50.5584,49.582,50.2634,52.3186,2.7945,3.6374,2.0552
+similarity,SICK-R,google/gemma-3-1b-pt (mean_pooling),51.7219,51.7529,46.6584,49.3244,45.1986,49.6378,5.0945,2.3975,4.4392
+similarity,STS22.v2,Qwen/Qwen3-Embedding-0.6B,67.6125,67.5511,69.6028,67.3427,71.102,67.6027,-2.0517,0.2698,-3.4993
+similarity,STS22.v2,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),15.3597,15.8196,16.2758,11.9068,17.7472,15.0294,-0.4562,3.4529,-2.7178
+similarity,STS22.v2,Qwen/Qwen3.5-0.8B-Base (mean_pooling),58.1593,58.2848,60.2035,44.7935,59.7057,57.0135,-1.9187,13.3658,-2.6922
+similarity,STS22.v2,google/embeddinggemma-300m,65.9011,66.016,66.5396,64.0226,65.8352,65.7341,-0.5236,1.8785,-0.1011
+similarity,STS22.v2,google/gemma-3-1b-pt (last_token_pooling),13.3914,14.2179,12.0779,11.8736,21.5694,12.8385,2.14,1.5178,-8.7309
+similarity,STS22.v2,google/gemma-3-1b-pt (mean_pooling),55.4454,55.3392,58.7871,38.6927,57.4609,53.0425,-3.4479,16.7527,-4.4184
+similarity,STSBenchmark,Qwen/Qwen3-Embedding-0.6B,84.7164,84.7883,84.5956,77.2935,82.7847,84.8776,0.1927,7.4229,2.0929
+similarity,STSBenchmark,Qwen/Qwen3.5-0.8B-Base (last_token_pooling),40.517,40.7045,36.2583,27.0522,36.3369,38.2673,4.4462,13.4648,1.9304
+similarity,STSBenchmark,Qwen/Qwen3.5-0.8B-Base (mean_pooling),44.8101,45.0798,41.089,37.8881,38.9564,41.2983,3.9908,6.922,2.3419
+similarity,STSBenchmark,google/embeddinggemma-300m,85.2696,85.4071,84.8628,78.4694,83.4719,81.3513,0.5443,6.8002,-2.1206
+similarity,STSBenchmark,google/gemma-3-1b-pt (last_token_pooling),47.2282,47.8718,41.1439,36.1698,42.4144,43.3355,6.7279,11.0584,0.9211
+similarity,STSBenchmark,google/gemma-3-1b-pt (mean_pooling),44.2933,44.5773,38.2319,36.6571,35.5628,39.4647,6.3454,7.6362,3.9019

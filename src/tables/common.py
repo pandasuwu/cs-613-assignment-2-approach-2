@@ -15,7 +15,9 @@ from src.tables.schema import (
 )
 
 
-def get_mean_scalar(df: pl.DataFrame, col: str = "value", default: float = 0.0) -> float:
+def get_mean_scalar(
+    df: pl.DataFrame, col: str = "value", default: float = 0.0
+) -> float:
     """Extract scalar mean from a column, with type-safe fallback."""
     if len(df) == 0:
         return default
