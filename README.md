@@ -128,6 +128,23 @@ uv run scripts/eval_geometry.py
 
 Pass `--overwrite` to any script to recompute existing cached artifacts or results.
 
+### Stage 4: Compile Research Tables
+
+Parses all 2,160 atomic results into 49 granular, publication-ready CSV tables in `tables/` using Polars in under 2 seconds:
+
+```bash
+# Generate all 49 tables across the 6 suites
+uv run scripts/generate_tables.py
+
+# Or generate a specific suite (1..6)
+uv run scripts/generate_tables.py --suite 1  # Full-dimension retrieval (9 tables)
+uv run scripts/generate_tables.py --suite 2  # Full-dimension similarity (6 tables)
+uv run scripts/generate_tables.py --suite 3  # Compression ladder across all metrics (15 tables)
+uv run scripts/generate_tables.py --suite 4  # Intrinsic geometry diagnostics (6 tables)
+uv run scripts/generate_tables.py --suite 5  # Token pooling ablations (2 tables)
+uv run scripts/generate_tables.py --suite 6  # Theoretical analysis tables (11 tables)
+```
+
 ## Code Quality
 
 ```bash
